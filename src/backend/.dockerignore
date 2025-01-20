@@ -1,0 +1,153 @@
+# ------------------------------------------------------------------------------
+# B2B Sales Intelligence & Engagement Platform
+# Docker Ignore Configuration File
+# ------------------------------------------------------------------------------
+# Purpose:
+#   - Exclude files and directories from the Docker build context
+#   - Enhance security by preventing sensitive files from entering container builds
+#   - Optimize build performance by not sending unnecessary files to Docker daemon
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------
+# 1. Exclude node_modules folder
+#    Reason: Dependencies will be installed fresh in the container for consistency
+# ------------------------------------------------------------------------------
+node_modules
+
+# ------------------------------------------------------------------------------
+# 2. Exclude dist folder
+#    Reason: Avoid sending compiled output to build context; it will be regenerated
+# ------------------------------------------------------------------------------
+dist
+
+# ------------------------------------------------------------------------------
+# 3. Exclude .env file
+#    Reason: Contains sensitive environment variables; keep out of container context
+# ------------------------------------------------------------------------------
+.env
+
+# ------------------------------------------------------------------------------
+# 4. Exclude any .env.* files (like .env.local, .env.development)
+#    Reason: Also sensitive environment-specific configs which must remain private
+# ------------------------------------------------------------------------------
+.env.*
+
+# ------------------------------------------------------------------------------
+# 5. Exclude all log files (e.g., npm-debug.log, yarn-debug.log, etc.)
+#    Reason: Logs are not needed in build context and may contain sensitive data
+# ------------------------------------------------------------------------------
+*.log
+
+# ------------------------------------------------------------------------------
+# 6. Exclude .git directory
+#    Reason: No need for version control history inside container
+# ------------------------------------------------------------------------------
+.git
+
+# ------------------------------------------------------------------------------
+# 7. Exclude coverage folder
+#    Reason: Test coverage reports are unnecessary for production image
+# ------------------------------------------------------------------------------
+coverage
+
+# ------------------------------------------------------------------------------
+# 8. Exclude tests folder
+#    Reason: Testing assets should not be included in final build context
+# ------------------------------------------------------------------------------
+tests
+
+# ------------------------------------------------------------------------------
+# 9. Exclude TypeScript spec files (unit tests)
+#    Reason: They are only required for local testing and CI, not production
+# ------------------------------------------------------------------------------
+src/**/*.spec.ts
+
+# ------------------------------------------------------------------------------
+# 10. Exclude TypeScript test files (integration tests)
+#    Reason: Avoid adding unnecessary overhead to the container build process
+# ------------------------------------------------------------------------------
+src/**/*.test.ts
+
+# ------------------------------------------------------------------------------
+# 11. Exclude all ESLint configuration files
+#    Reason: Lint config is not needed inside the final container
+# ------------------------------------------------------------------------------
+.eslintrc*
+
+# ------------------------------------------------------------------------------
+# 12. Exclude all Prettier configuration files
+#    Reason: Formatting configuration is irrelevant to the built container
+# ------------------------------------------------------------------------------
+.prettierrc*
+
+# ------------------------------------------------------------------------------
+# 13. Exclude TypeScript incremental build info file
+#    Reason: Not needed in the container; keeps incremental data private locally
+# ------------------------------------------------------------------------------
+tsconfig.tsbuildinfo
+
+# ------------------------------------------------------------------------------
+# 14. Exclude .vscode directory
+#    Reason: Editor configurations are not required in final container builds
+# ------------------------------------------------------------------------------
+.vscode
+
+# ------------------------------------------------------------------------------
+# 15. Exclude .idea directory
+#    Reason: JetBrains IDE settings do not belong in a container build context
+# ------------------------------------------------------------------------------
+.idea
+
+# ------------------------------------------------------------------------------
+# 16. Exclude prisma/migrations directory
+#    Reason: Migration files are typically handled separately; not needed in build
+# ------------------------------------------------------------------------------
+prisma/migrations
+
+# ------------------------------------------------------------------------------
+# 17. Exclude any Prisma database files
+#    Reason: No local database artifacts should be included
+# ------------------------------------------------------------------------------
+prisma/*.db
+
+# ------------------------------------------------------------------------------
+# 18. Exclude SSL/TLS certificate files (.pem)
+#    Reason: Private certificates must remain secure; not included in container
+# ------------------------------------------------------------------------------
+**/*.pem
+
+# ------------------------------------------------------------------------------
+# 19. Exclude private key files (.key)
+#    Reason: Private keys must remain secure; not included in container
+# ------------------------------------------------------------------------------
+**/*.key
+
+# ------------------------------------------------------------------------------
+# 20. Exclude any secrets directory
+#    Reason: Protect sensitive information; never include in Docker image builds
+# ------------------------------------------------------------------------------
+**/secrets
+
+# ------------------------------------------------------------------------------
+# 21. Exclude NYC (Istanbul) output for code coverage
+#    Reason: Coverage data is not relevant to production containers
+# ------------------------------------------------------------------------------
+.nyc_output
+
+# ------------------------------------------------------------------------------
+# 22. Exclude all docker-compose configuration files
+#    Reason: They are used only for local orchestration, not the build context
+# ------------------------------------------------------------------------------
+docker-compose*.yml
+
+# ------------------------------------------------------------------------------
+# 23. Exclude README.md
+#    Reason: Documentation files do not affect runtime and can be omitted
+# ------------------------------------------------------------------------------
+README.md
+
+# ------------------------------------------------------------------------------
+# 24. Exclude this .dockerignore file itself
+#    Reason: Avoid recursively copying the ignore file; prevents large contexts
+# ------------------------------------------------------------------------------
+.dockerignore
