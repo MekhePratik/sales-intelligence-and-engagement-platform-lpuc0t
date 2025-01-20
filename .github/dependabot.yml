@@ -1,0 +1,181 @@
+# This Dependabot configuration file automates dependency management and security updates.
+# It addresses both Development & Deployment requirements (Technical Specs/4.5)
+# and Security Controls (Technical Specs/7.3) by scanning our package.json files
+# in /src/backend and /src/web, as well as Docker and GitHub Actions dependencies.
+# The configuration ensures consistent, reliable updates, including batching groups
+# (e.g., TypeScript types, React packages), while providing security-focused labeling
+# and review workflows.
+
+version: 2
+
+updates:
+  # ------------------------------------------------------------------------------
+  # Update 1: NPM Dependencies for Backend
+  # Targets the /src/backend directory to manage Node.js dependencies
+  # including devDependencies from src/backend/package.json.
+  # It runs weekly on Monday at 09:00 UTC with an auto versioning strategy.
+  # Groups and ignore rules help isolate specific updates (e.g., typescript-types).
+  # ------------------------------------------------------------------------------
+  - package-ecosystem: npm
+    directory: "/src/backend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    versioning-strategy: "auto"
+    labels:
+      - "dependencies"
+      - "backend"
+      - "security"
+    reviewers:
+      - "backend-team"
+      - "security-team"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    groups:
+      typescript-types:
+        patterns:
+          - "@types/*"
+        update-types:
+          - "major"
+          - "minor"
+          - "patch"
+      test-packages:
+        patterns:
+          - "jest*"
+          - "@testing-library/*"
+        update-types:
+          - "major"
+          - "minor"
+          - "patch"
+      security-critical:
+        patterns:
+          - "crypto*"
+          - "auth*"
+          - "jwt*"
+        update-types:
+          - "patch"
+          - "minor"
+    ignore:
+      - dependency-name: "typescript"
+        versions:
+          - ">=6.0.0"
+    security-updates-only: false
+    open-pull-requests-limit: 10
+
+  # ------------------------------------------------------------------------------
+  # Update 2: NPM Dependencies for Frontend
+  # Targets the /src/web directory to manage dependencies in src/web/package.json.
+  # Runs weekly each Monday at 09:00 UTC, labeling PRs for 'frontend' and 'security',
+  # and grouping React, Next.js, and UI components for an organized update process.
+  # ------------------------------------------------------------------------------
+  - package-ecosystem: npm
+    directory: "/src/web"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    versioning-strategy: "auto"
+    labels:
+      - "dependencies"
+      - "frontend"
+      - "security"
+    reviewers:
+      - "frontend-team"
+      - "security-team"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    groups:
+      react-packages:
+        patterns:
+          - "react*"
+          - "@types/react*"
+        update-types:
+          - "major"
+          - "minor"
+          - "patch"
+      next-packages:
+        patterns:
+          - "next*"
+          - "@types/next*"
+        update-types:
+          - "major"
+          - "minor"
+          - "patch"
+      ui-components:
+        patterns:
+          - "@shadcn*"
+          - "@radix-ui*"
+        update-types:
+          - "patch"
+          - "minor"
+    ignore:
+      - dependency-name: "typescript"
+        versions:
+          - ">=6.0.0"
+    security-updates-only: false
+    open-pull-requests-limit: 10
+
+  # ------------------------------------------------------------------------------
+  # Update 3: Docker Dependencies for Backend
+  # Scans Docker images in /src/backend for updates, runs weekly, and limits
+  # open PRs to five. Labels PRs for 'docker' and 'security' concerns, ensuring
+  # container images remain secure and up to date.
+  # ------------------------------------------------------------------------------
+  - package-ecosystem: docker
+    directory: "/src/backend"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    labels:
+      - "dependencies"
+      - "docker"
+      - "security"
+    reviewers:
+      - "devops-team"
+      - "security-team"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    security-updates-only: false
+    open-pull-requests-limit: 5
+
+  # ------------------------------------------------------------------------------
+  # Update 4: GitHub Actions Dependencies
+  # Targets the root directory to manage any GitHub Actions versions in workflow files.
+  # Scheduled for weekly checks with a specific group (actions-core) to handle updates
+  # to official GitHub Actions separately.
+  # ------------------------------------------------------------------------------
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: "weekly"
+      day: "monday"
+      time: "09:00"
+      timezone: "UTC"
+    labels:
+      - "dependencies"
+      - "ci-cd"
+      - "security"
+    reviewers:
+      - "devops-team"
+      - "security-team"
+    commit-message:
+      prefix: "chore(deps)"
+      include: "scope"
+    groups:
+      actions-core:
+        patterns:
+          - "actions/*"
+        update-types:
+          - "major"
+          - "minor"
+          - "patch"
+    security-updates-only: false
+    open-pull-requests-limit: 5
