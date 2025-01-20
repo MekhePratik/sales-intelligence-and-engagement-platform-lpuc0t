@@ -1,0 +1,148 @@
+name: Backend CI
+
+# ---------------------------------------------------------------------------------------
+# This GitHub Actions workflow implements a comprehensive continuous integration process
+# for the backend service, addressing automated tests, linting, and build verification.
+# It references:
+#  - Node.js version and scripts defined in package.json (engines & scripts)
+#  - TypeScript compiler settings from tsconfig.json (compilerOptions)
+#  - Jest configuration from jest.config.ts (default config)
+# ---------------------------------------------------------------------------------------
+
+on:
+  push:
+    branches: [ "main", "develop" ]
+  pull_request:
+    branches: [ "main", "develop" ]
+
+jobs:
+  # ===============================================================================
+  # TEST JOB
+  # ===============================================================================
+  test:
+    name: Test & Quality Checks
+    runs-on: ubuntu-latest
+    steps:
+      # ----------------------------------------------------------------------------
+      # Step 1: Check out the repository to allow access to code.
+      # ----------------------------------------------------------------------------
+      - name: Checkout
+        uses: actions/checkout@v4  # v4 (latest)
+
+      # ----------------------------------------------------------------------------
+      # Step 2: Configure the Node.js environment using the Node version required
+      #         by package.json "engines" and enabling pnpm caching.
+      # ----------------------------------------------------------------------------
+      - name: Setup Node.js
+        uses: actions/setup-node@v4  # v4 (latest)
+        with:
+          node-version: 18.17.0
+          cache: pnpm
+
+      # ----------------------------------------------------------------------------
+      # Step 3: Install the pnpm package manager matching the "pnpm_version" (8.x).
+      # ----------------------------------------------------------------------------
+      - name: Install pnpm
+        run: npm install -g pnpm@8.x
+
+      # ----------------------------------------------------------------------------
+      # Step 4: Install all backend dependencies with exact versions, ensuring a
+      #         reproducible environment ("--frozen-lockfile").
+      # ----------------------------------------------------------------------------
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      # ----------------------------------------------------------------------------
+      # Step 5: Perform a strict TypeScript type check using "tsc --noEmit". This
+      #         references the compilerOptions from tsconfig.json and will fail if
+      #         any type errors are found.
+      # ----------------------------------------------------------------------------
+      - name: Type Check
+        run: pnpm tsc --noEmit
+
+      # ----------------------------------------------------------------------------
+      # Step 6: Run ESLint lint checks. This enforces code quality rules aligned with
+      #         our Code Quality Standards (see package.json scripts).
+      # ----------------------------------------------------------------------------
+      - name: Lint
+        run: pnpm lint
+
+      # ----------------------------------------------------------------------------
+      # Step 7: Execute unit tests with coverage, referencing jest.config.ts default
+      #         configuration and coverage thresholds. The environment variables
+      #         CI=true and NODE_ENV=test ensure proper test behavior in CI mode.
+      # ----------------------------------------------------------------------------
+      - name: Unit Tests
+        run: pnpm test:unit --coverage
+        env:
+          CI: "true"
+          NODE_ENV: "test"
+
+      # ----------------------------------------------------------------------------
+      # Step 8: Execute integration tests. This step can include API checks, database
+      #         interactions, and end-to-end scenarios if configured appropriately.
+      # ----------------------------------------------------------------------------
+      - name: Integration Tests
+        run: pnpm test:integration
+        env:
+          CI: "true"
+          NODE_ENV: "test"
+
+  # ===============================================================================
+  # BUILD JOB
+  # ===============================================================================
+  build:
+    name: Build & Artifact
+    needs: [ test ]
+    runs-on: ubuntu-latest
+    steps:
+      # ----------------------------------------------------------------------------
+      # Step 1: Check out the repository again to ensure fresh code if concurrency
+      #         occurs across jobs.
+      # ----------------------------------------------------------------------------
+      - name: Checkout
+        uses: actions/checkout@v4  # v4 (latest)
+
+      # ----------------------------------------------------------------------------
+      # Step 2: Set up the Node.js environment, matching the test job configuration
+      #         for consistency.
+      # ----------------------------------------------------------------------------
+      - name: Setup Node.js
+        uses: actions/setup-node@v4  # v4 (latest)
+        with:
+          node-version: 18.17.0
+          cache: pnpm
+
+      # ----------------------------------------------------------------------------
+      # Step 3: Install pnpm again in the build job context.
+      # ----------------------------------------------------------------------------
+      - name: Install pnpm
+        run: npm install -g pnpm@8.x
+
+      # ----------------------------------------------------------------------------
+      # Step 4: Install dependencies (identical to the test job) to ensure code is
+      #         in a correct and locked state for building.
+      # ----------------------------------------------------------------------------
+      - name: Install Dependencies
+        run: pnpm install --frozen-lockfile
+
+      # ----------------------------------------------------------------------------
+      # Step 5: Build the production bundle, referencing the "build" script from
+      #         package.json. This uses the TypeScript compiler settings and any
+      #         necessary bundling steps for deployment.
+      # ----------------------------------------------------------------------------
+      - name: Build
+        run: pnpm build
+        env:
+          CI: "true"
+          NODE_ENV: "production"
+
+      # ----------------------------------------------------------------------------
+      # Step 6: Upload the build artifact (dist folder) so further workflows or
+      #         deployment steps can reference the compiled output.
+      # ----------------------------------------------------------------------------
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v3  # v3 (latest)
+        with:
+          name: backend-build
+          path: dist
