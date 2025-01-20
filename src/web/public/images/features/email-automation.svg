@@ -1,0 +1,491 @@
+<!-- 
+  Production-Ready SVG Illustration 
+  File Path: src/web/public/images/features/email-automation.svg
+  
+  EXTENSIVE COMMENTS AND IMPLEMENTATIONS, PER SPECIFICATION:
+
+  ------------------------------------------------------------------------------------
+  OVERVIEW:
+  This SVG represents the "Email Automation" feature of the B2B sales intelligence 
+  platform. It visually conveys automated email sequencing (template management, 
+  sequence builder, A/B testing engine) and analytics in compliance with the provided 
+  design system standards, color palettes, and accessibility guidelines.
+
+  ------------------------------------------------------------------------------------
+  REQUIREMENTS ADDRESSED:
+  1) Email Automation (Scope/Core Features):
+     - Showcases stacked email templates indicating sequence flow.
+     - Portrays automated workflow with directional arrows and nodes.
+     - Includes analytics indicators reflecting performance metrics.
+
+  2) User Interface Design (Design System):
+     - Utilizes the official color palette (#2563eb, #64748b, #0ea5e9, #ffffff, #e2e8f0).
+     - Maintains responsive considerations and consistent stroke/fill settings.
+
+  ------------------------------------------------------------------------------------
+  IMAGE METADATA & SPECIFICATIONS:
+  - Type: SVG
+  - Dimensions: width="400px", height="300px"
+    * viewBox="0 0 400 300" 
+    * Maintains 4:3 aspect ratio
+  - Primary Color Palette:
+      primary:   #2563eb
+      secondary: #64748b
+      accent:    #0ea5e9
+      background:#ffffff
+      stroke:    #e2e8f0
+  - Style:
+      stroke-width:     2px
+      fill-opacity:     0.9
+      responsive:       true (use width="100%" or explicit + viewBox)
+      animation.enabled:true 
+      animation.duration="0.3s"
+      animation.timing="ease-in-out"
+
+  ------------------------------------------------------------------------------------
+  DESIGN ELEMENTS (Groups and Components):
+  1) EmailTemplates (Stacked cards indicating template flow)
+     - Position: x=50,  y=50,  width=120, height=200
+     - Components: TemplateCard, ContentPreview, StatusIndicator
+
+  2) AutomationFlow (Connected arrows/nodes showing progression)
+     - Position: x=170, y=50,  width=160, height=200
+     - Components: FlowNodes, ConnectionLines, DirectionalArrows
+
+  3) AnalyticsIndicators (Charts, metrics, progress states)
+     - Position: x=330, y=50,  width=120, height=200
+     - Components: MiniCharts, MetricDisplays, ProgressIndicators
+
+  ------------------------------------------------------------------------------------
+  ACCESSIBILITY:
+  - role="img"
+  - aria-label="Email automation feature illustration"
+  - title/desc tags for screen readers
+  - alt_text: "Visual representation of email automation workflow..."
+  - High Contrast Mode:
+      background: #ffffff
+      foreground: #000000
+    (Implementable via CSS if needed.)
+
+  ------------------------------------------------------------------------------------
+  OPTIMIZATION & PERFORMANCE:
+  - Minified, Compressed, Lazy Loading recommended in production builds.
+  - Techniques: Path optimization, Metadata removal, SVGO, Gzip.
+  - Target file size: <10KB (compressed <5KB).
+
+  ------------------------------------------------------------------------------------
+  USAGE CONTEXTS (Informational Only):
+  - LandingPage @ src/web/src/app/page.tsx
+    wrapper div with className="feature-illustration" 
+  - CampaignOverview @ src/web/src/components/dashboard/CampaignOverview.tsx
+    wrapper div with className="campaign-illustration"
+  - Responsive classes: 
+      "w-full", "md:w-1/2", "lg:w-1/3" or 
+      "w-full", "md:w-full", "lg:w-2/3"
+
+  ------------------------------------------------------------------------------------
+  BROWSER SUPPORT & FALLBACK:
+  - Minimum Versions: Chrome 49+, Firefox 53+, Safari 10+, Edge 79+
+  - Fallback: src/web/public/images/features/email-automation.png (PNG)
+
+  ------------------------------------------------------------------------------------
+  SECURITY & COMPLIANCE:
+  - No sensitive data included in the graphic.
+  - Safe to embed inline in public pages.
+
+  ------------------------------------------------------------------------------------
+-->
+
+<svg 
+  xmlns="http://www.w3.org/2000/svg"
+  xml:lang="en"
+  role="img"
+  aria-label="Email automation feature illustration"
+  viewBox="0 0 400 300"
+  width="400"
+  height="300"
+>
+  <!-- TITLE & DESCRIPTION FOR ACCESSIBILITY -->
+  <title id="email-automation-title">
+    Email Automation Feature Illustration
+  </title>
+  <desc id="email-automation-desc">
+    Visual representation of email automation workflow showing template management,
+    sequence flow, and performance analytics
+  </desc>
+
+  <!-- 
+    STYLING SECTION:
+    - Basic styling for stroke, fill, and animations.
+    - For production minification, embed or externally reference CSS/inline styles.
+    - Keyframe transitions or animations can be included as needed.
+  -->
+  <style>
+    /* Base Colors and Reusables */
+    :root {
+      --primary-color: #2563eb;
+      --secondary-color: #64748b;
+      --accent-color: #0ea5e9;
+      --bg-color: #ffffff;
+      --stroke-color: #e2e8f0;
+      --high-contrast-bg: #ffffff;
+      --high-contrast-fg: #000000;
+      --transition-duration: 0.3s;
+      --transition-timing: ease-in-out;
+    }
+
+    /* Global SVG Settings */
+    svg {
+      /* Maintains responsiveness if width/height changed to percentages externally */
+      max-width: 100%;
+      height: auto;
+    }
+
+    g,
+    path,
+    rect,
+    circle,
+    line,
+    polygon {
+      stroke: var(--stroke-color);
+      stroke-width: 2px;
+      fill-opacity: 0.9;
+      transition: all var(--transition-duration) var(--transition-timing);
+    }
+
+    /* Hover/Focus Animations or Basic Keyframes Example */
+    g:hover path,
+    g:hover rect,
+    g:hover circle,
+    g:hover line,
+    g:hover polygon {
+      opacity: 0.8;
+      cursor: pointer;
+    }
+  </style>
+
+  <!-- 
+    GROUP 1 : EmailTemplates 
+    DESCRIPTION: 
+    Stacked email "cards" that showcase potential email templates within a sequence. 
+    COMPONENTS: TemplateCard, ContentPreview, StatusIndicator
+    POSITION: (50,50) with the bounding area of 120x200 
+  -->
+  <g id="EmailTemplates" transform="translate(50, 50)">
+    <!-- 
+      TemplateCard #1 
+      A rectangle representing an email template card.
+      Using primary color for the outline fill demonstration.
+    -->
+    <rect
+      x="0"
+      y="0"
+      width="80"
+      height="40"
+      fill="var(--primary-color)"
+      rx="4"
+      ry="4" 
+    >
+    </rect>
+    <!-- 
+      ContentPreview #1 
+      Smaller rectangle(s) inside to show text or content placeholders.
+      Using secondary color for differentiation.
+    -->
+    <rect
+      x="6"
+      y="8"
+      width="68"
+      height="8"
+      fill="var(--secondary-color)"
+    >
+    </rect>
+    <rect
+      x="6"
+      y="20"
+      width="40"
+      height="6"
+      fill="var(--secondary-color)"
+    >
+    </rect>
+    <!-- 
+      StatusIndicator #1 
+      A small circle at the top-right corner indicating the status of the template.
+      Using accent color for emphasis.
+    -->
+    <circle
+      cx="75"
+      cy="5"
+      r="4"
+      fill="var(--accent-color)"
+    >
+    </circle>
+
+    <!-- 
+      TemplateCard #2 
+      Shifted down to create a stacked effect.
+    -->
+    <rect
+      x="10"
+      y="50"
+      width="80"
+      height="40"
+      fill="var(--primary-color)"
+      rx="4"
+      ry="4"
+    >
+    </rect>
+    <rect
+      x="16"
+      y="58"
+      width="68"
+      height="8"
+      fill="var(--secondary-color)"
+    >
+    </rect>
+    <rect
+      x="16"
+      y="70"
+      width="40"
+      height="6"
+      fill="var(--secondary-color)"
+    >
+    </rect>
+    <circle
+      cx="85"
+      cy="55"
+      r="4"
+      fill="var(--accent-color)"
+    >
+    </circle>
+
+    <!-- 
+      TemplateCard #3 
+      Further down for stacking demonstration.
+    -->
+    <rect
+      x="20"
+      y="100"
+      width="80"
+      height="40"
+      fill="var(--primary-color)"
+      rx="4"
+      ry="4"
+    >
+    </rect>
+    <rect
+      x="26"
+      y="108"
+      width="68"
+      height="8"
+      fill="var(--secondary-color)"
+    >
+    </rect>
+    <rect
+      x="26"
+      y="120"
+      width="40"
+      height="6"
+      fill="var(--secondary-color)"
+    >
+    </rect>
+    <circle
+      cx="95"
+      cy="105"
+      r="4"
+      fill="var(--accent-color)"
+    >
+    </circle>
+  </g>
+
+  <!-- 
+    GROUP 2 : AutomationFlow 
+    DESCRIPTION: 
+    Illustrates the flow of these templates with connections/arrows/nodes.
+    COMPONENTS: FlowNodes, ConnectionLines, DirectionalArrows
+    POSITION: (170,50) with bounding area of 160x200
+  -->
+  <g id="AutomationFlow" transform="translate(170, 50)">
+    <!-- FlowNodes (circles or shapes used as steps in flow) -->
+    <circle
+      cx="20"
+      cy="20"
+      r="10"
+      fill="var(--secondary-color)"
+    >
+    </circle>
+    <circle
+      cx="20"
+      cy="60"
+      r="10"
+      fill="var(--secondary-color)"
+    >
+    </circle>
+    <circle
+      cx="20"
+      cy="100"
+      r="10"
+      fill="var(--secondary-color)"
+    >
+    </circle>
+
+    <!-- ConnectionLines (lines connecting the nodes) -->
+    <line
+      x1="20"
+      y1="30"
+      x2="20"
+      y2="50"
+      stroke="var(--stroke-color)"
+    />
+    <line
+      x1="20"
+      y1="70"
+      x2="20"
+      y2="90"
+      stroke="var(--stroke-color)"
+    />
+
+    <!-- DirectionalArrows (small polygon or path denoting arrowheads) -->
+    <!-- 
+      For demonstration, place an arrow from node to node horizontally or diagonally.
+    -->
+    <!-- Arrow from first node (left) to some right position -->
+    <line
+      x1="30"
+      y1="20"
+      x2="60"
+      y2="20"
+      stroke="var(--stroke-color)"
+    />
+    <polygon
+      points="60,20 55,15 55,25"
+      fill="var(--stroke-color)"
+    />
+
+    <!-- Arrow from second node -->
+    <line
+      x1="30"
+      y1="60"
+      x2="60"
+      y2="60"
+      stroke="var(--stroke-color)"
+    />
+    <polygon
+      points="60,60 55,55 55,65"
+      fill="var(--stroke-color)"
+    />
+
+    <!-- Arrow from third node -->
+    <line
+      x1="30"
+      y1="100"
+      x2="60"
+      y2="100"
+      stroke="var(--stroke-color)"
+    />
+    <polygon
+      points="60,100 55,95 55,105"
+      fill="var(--stroke-color)"
+    />
+
+    <!-- 
+      Additional flow representation (optional):
+      connecting lines/arrow to next station, 
+      or some path to represent user-chosen directions.
+    -->
+    <line
+      x1="60"
+      y1="20"
+      x2="60"
+      y2="100"
+      stroke="var(--stroke-color)"
+      stroke-dasharray="3,3"
+    />
+    <polygon
+      points="60,100 55,95 65,95"
+      fill="var(--stroke-color)"
+    />
+  </g>
+
+  <!-- 
+    GROUP 3 : AnalyticsIndicators 
+    DESCRIPTION:
+    Displays small charts, metrics, or progress indicators reflecting campaign analytics.
+    COMPONENTS: MiniCharts, MetricDisplays, ProgressIndicators
+    POSITION: (330,50) with bounding area of 120x200
+    WARNING: x=330 + width=120 => extends beyond 400, partially out of viewBox, implementing per specification anyway.
+  -->
+  <g id="AnalyticsIndicators" transform="translate(330, 50)">
+    <!-- MiniCharts example: simple bar chart -->
+    <rect
+      x="0"
+      y="0"
+      width="8"
+      height="30"
+      fill="var(--secondary-color)"
+    ></rect>
+    <rect
+      x="12"
+      y="0"
+      width="8"
+      height="50"
+      fill="var(--accent-color)"
+    ></rect>
+    <rect
+      x="24"
+      y="0"
+      width="8"
+      height="20"
+      fill="var(--secondary-color)"
+    ></rect>
+
+    <!-- MetricDisplays example: labeled text for stats -->
+    <text
+      x="0"
+      y="70"
+      fill="var(--primary-color)"
+      font-size="12"
+      font-family="Arial, sans-serif"
+    >
+      Open Rate: 28%
+    </text>
+    <text
+      x="0"
+      y="90"
+      fill="var(--primary-color)"
+      font-size="12"
+      font-family="Arial, sans-serif"
+    >
+      Click Rate: 12%
+    </text>
+
+    <!-- ProgressIndicators example: a partial ring or arc is more complex, 
+         here we demonstrate a simple horizontal progress bar. -->
+    <rect
+      x="0"
+      y="110"
+      width="70"
+      height="8"
+      fill="var(--stroke-color)"
+      rx="4"
+      ry="4"
+    ></rect>
+    <rect
+      x="0"
+      y="110"
+      width="35"
+      height="8"
+      fill="var(--accent-color)"
+      rx="4"
+      ry="4"
+    ></rect>
+  </g>
+
+  <!-- 
+    END OF ILLUSTRATION
+    Note: For minification and compression (SVGO, Gzip) in production, 
+    large whitespace and comments can be safely removed.
+    Additional advanced techniques (like path merging) can be implemented 
+    to reduce file size below the target <10KB threshold.
+  -->
+</svg>
