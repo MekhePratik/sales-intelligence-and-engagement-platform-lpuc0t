@@ -1,0 +1,200 @@
+//
+// Prisma schema definition for the B2B sales intelligence platform
+// with enhanced security, multi-tenancy, and performance features.
+//
+// This file configures the PostgreSQL datasource, Prisma Client generator,
+// required PostgreSQL extensions, and the core data models that underpin
+// the platform’s multi-tenant architecture.
+//
+// External Library Reference (ORM):
+// Using @prisma/client ^5.2.0
+//
+
+// -------------------------------------------------------
+//  GENERATOR AND DATASOURCE CONFIGURATION
+// -------------------------------------------------------
+
+generator client {
+  // The Prisma Client generator is responsible for producing
+  // the type-safe client we use in our TypeScript application.
+  provider        = "prisma-client-js"
+  previewFeatures = ["fullTextSearch", "multiSchema", "postgresqlExtensions"]
+  engineType      = "binary"
+}
+
+datasource db {
+  // The PostgreSQL datasource includes both the standard URL
+  // and a directUrl for internal reads/writes, facilitating
+  // improved performance and connection pooling in production.
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// -------------------------------------------------------
+//  POSTGRESQL EXTENSIONS
+// -------------------------------------------------------
+//
+// These extensions are leveraged for advanced functionality:
+// - uuid_ossp: Generates UUID values for primary keys
+// - pgcrypto: Supports encryption and cryptographic features
+// - citext: Enables case-insensitive text columns
+//
+extension "uuid_ossp" {}
+extension "pgcrypto" {}
+extension "citext" {}
+
+// -------------------------------------------------------
+//  ENUMS
+// -------------------------------------------------------
+//
+// The UserRole enum enforces role-based access control levels.
+// Adjust or expand roles as necessary for your permission model.
+//
+enum UserRole {
+  ADMIN
+  MANAGER
+  USER
+}
+
+// -------------------------------------------------------
+//  MODEL: USER
+// -------------------------------------------------------
+//
+// The User model represents individual users within a tenant’s
+// organization. It supports role-based access and includes fields
+// for user-specific settings, last login tracking, and timestamps.
+//
+// Note: The `organizationId` field provides the multi-tenant link
+// back to the Organization model. The email field is stored as CITEXT
+// for case-insensitive uniqueness checks.
+//
+model User {
+  // Primary Key: Generated via pgcrypto / uuid_ossp
+  id             String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  // Unique email for user identification, stored as CIText
+  email          String    @unique @db.Citext
+
+  // Full name for display in the UI
+  name           String    @db.VarChar(255)
+
+  // Role-based access control
+  role           UserRole  @default(USER)
+
+  // Foreign key referencing the Organization the user belongs to
+  organizationId String    @db.Uuid
+  organization   Organization @relation("OrganizationUsers", fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Tracks last login timestamp for auditing
+  lastLoginAt    DateTime? @db.Timestamptz(6)
+
+  // Arbitrary JSON settings (e.g., notifications, preferences)
+  settings       Json?     @db.JsonB
+
+  // Whether the account is active or disabled
+  isActive       Boolean   @default(true)
+
+  // Audit fields for creation and last update tracking
+  createdAt      DateTime  @default(now()) @db.Timestamptz(6)
+  updatedAt      DateTime  @updatedAt      @db.Timestamptz(6)
+
+  // Index to facilitate frequent queries filtering by tenant
+  @@index([organizationId])
+
+  // Optional: Map model to a custom table name
+  // @@map("users")
+}
+
+// -------------------------------------------------------
+//  MODEL: ORGANIZATION
+// -------------------------------------------------------
+//
+// Represents a multi-tenant boundary. Each organization owns many
+// users, leads, and campaigns. This design ensures strong separation
+// of tenant data.
+//
+// The domain field is stored as CITEXT to support case-insensitive
+// uniqueness checks, which can be helpful for domain-based logic.
+//
+model Organization {
+  // Primary Key: Generated via pgcrypto / uuid_ossp
+  id         String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+
+  // Display name of the organization
+  name       String      @db.VarChar(255)
+
+  // Unique domain for identification (case-insensitive)
+  domain     String      @unique @db.Citext
+
+  // Arbitrary JSON settings (org-level preferences, plan data, etc.)
+  settings   Json?       @db.JsonB
+
+  // One-to-many relation to users via OrganizationUsers
+  users      User[]      @relation("OrganizationUsers")
+
+  // One-to-many relation to leads via OrganizationLeads
+  leads      Lead[]      @relation("OrganizationLeads")
+
+  // One-to-many relation to campaigns via OrganizationCampaigns
+  campaigns  Campaign[]  @relation("OrganizationCampaigns")
+
+  // Optional: Map model to a custom table name
+  // @@map("organizations")
+}
+
+// -------------------------------------------------------
+//  MODEL: LEAD
+// -------------------------------------------------------
+//
+// While not listed explicitly in the "exports" array, this model is
+// required for the Organization.leads relation to exist. It stores
+// key details on prospective sales leads, including metadata and a
+// lead score. The multi-tenant boundary is enforced via organizationId.
+//
+model Lead {
+  id               String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email            String         @db.VarChar(255)
+  name             String?        @db.VarChar(255)
+  companyData      Json?          @db.JsonB
+  score            Int?
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime       @updatedAt      @db.Timestamptz(6)
+
+  // Multi-tenant linkage
+  organizationId   String         @db.Uuid
+  organization     Organization   @relation("OrganizationLeads", fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Indexes for filtering across large data sets
+  @@index([organizationId])
+  // @@index([email]) // Uncomment if searching by lead email is common.
+
+  // Optional: @@map("leads")
+}
+
+// -------------------------------------------------------
+//  MODEL: CAMPAIGN
+// -------------------------------------------------------
+//
+// Also required for the Organization.campaigns relation. Contains info
+// on marketing or sales outreach campaigns. This model manages settings
+// (sequence steps, email templates) and references an organizationId
+// for multi-tenant data separation.
+//
+model Campaign {
+  id               String         @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name             String         @db.VarChar(255)
+  status           String         @default("draft") @db.VarChar(50)
+  settings         Json?          @db.JsonB
+  createdAt        DateTime       @default(now()) @db.Timestamptz(6)
+  updatedAt        DateTime       @updatedAt      @db.Timestamptz(6)
+
+  // Multi-tenant boundary
+  organizationId   String         @db.Uuid
+  organization     Organization   @relation("OrganizationCampaigns", fields: [organizationId], references: [id], onDelete: Cascade)
+
+  // Index to optimize queries partitioned by tenant
+  @@index([organizationId])
+
+  // Optional: @@map("campaigns")
+}
