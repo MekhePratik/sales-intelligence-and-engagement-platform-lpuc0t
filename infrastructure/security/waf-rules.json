@@ -1,0 +1,267 @@
+{
+  "waf_rules": {
+    "general": {
+      "enabled": true,
+      "mode": "block",
+      "log_level": "warn",
+      "custom_response": {
+        "status_code": 403,
+        "body": "Access denied by security policy",
+        "headers": {
+          "X-Security-Error": "WAF_BLOCK",
+          "X-Request-ID": "${request.id}"
+        }
+      }
+    },
+    "ip_rules": {
+      "allow_list": [
+        "allow_list_placeholder"
+      ],
+      "block_list": [
+        "block_list_placeholder"
+      ],
+      "country_block_list": [
+        "restricted_countries"
+      ],
+      "ip_reputation_enabled": true,
+      "ip_reputation_threshold": 80,
+      "ip_rate_limiting": {
+        "enabled": true,
+        "window_size": 60,
+        "max_requests": 1000,
+        "burst_multiplier": 2
+      }
+    },
+    "request_rules": {
+      "max_uri_length": 2048,
+      "max_header_length": 8192,
+      "max_body_size": "10mb",
+      "allowed_http_methods": [
+        "GET",
+        "POST",
+        "PUT",
+        "DELETE",
+        "PATCH"
+      ],
+      "blocked_file_extensions": [
+        ".php",
+        ".asp",
+        ".aspx",
+        ".jsp",
+        ".cgi"
+      ],
+      "required_headers": [
+        "user-agent",
+        "host"
+      ],
+      "security_headers": {
+        "X-Frame-Options": "DENY",
+        "X-Content-Type-Options": "nosniff",
+        "X-XSS-Protection": "1; mode=block",
+        "Strict-Transport-Security": "max-age=31536000; includeSubDomains",
+        "Referrer-Policy": "strict-origin-when-cross-origin"
+      }
+    },
+    "attack_protection": {
+      "sql_injection": {
+        "enabled": true,
+        "action": "block",
+        "sensitivity": "high",
+        "custom_rules": [
+          "custom_sql_patterns"
+        ]
+      },
+      "xss": {
+        "enabled": true,
+        "action": "block",
+        "sensitivity": "high",
+        "sanitization": true
+      },
+      "csrf": {
+        "enabled": true,
+        "exempt_paths": [
+          "/api/webhooks/*"
+        ],
+        "token_expiry": 3600,
+        "token_regeneration": true
+      },
+      "path_traversal": {
+        "enabled": true,
+        "action": "block",
+        "allowed_paths": [
+          "/api",
+          "/assets"
+        ]
+      },
+      "command_injection": {
+        "enabled": true,
+        "action": "block",
+        "pattern_matching": "strict"
+      }
+    },
+    "rate_limiting": {
+      "enabled": true,
+      "integration": "rate-limits.json",
+      "ddos_protection": {
+        "enabled": true,
+        "threshold": 10000,
+        "window": 60,
+        "cloudflare": {
+          "enabled": true,
+          "action": "challenge",
+          "sensitivity": "high"
+        },
+        "queue": {
+          "enabled": true,
+          "max_size": 1000,
+          "timeout": 30
+        }
+      }
+    },
+    "api_security": {
+      "require_authentication": true,
+      "jwt_verification": {
+        "enabled": true,
+        "algorithms": [
+          "HS256"
+        ],
+        "exempt_paths": [
+          "/api/auth/login",
+          "/api/auth/register",
+          "/api/auth/forgot-password"
+        ],
+        "token_validation": {
+          "exp": true,
+          "iss": true,
+          "sub": true
+        }
+      },
+      "api_key_validation": {
+        "enabled": true,
+        "header_name": "X-API-Key",
+        "key_format": "^[A-Za-z0-9]{32}$",
+        "rate_limiting": {
+          "enabled": true,
+          "requests_per_minute": 100
+        }
+      }
+    },
+    "content_security": {
+      "enabled": true,
+      "policies": {
+        "default-src": [
+          "'self'"
+        ],
+        "script-src": [
+          "'self'",
+          "'unsafe-inline'",
+          "*.vercel.app"
+        ],
+        "style-src": [
+          "'self'",
+          "'unsafe-inline'"
+        ],
+        "img-src": [
+          "'self'",
+          "data:",
+          "https:"
+        ],
+        "connect-src": [
+          "'self'",
+          "*.supabase.co",
+          "*.vercel.app"
+        ],
+        "frame-ancestors": [
+          "'none'"
+        ],
+        "form-action": [
+          "'self'"
+        ]
+      }
+    }
+  },
+  "monitoring": {
+    "logging": {
+      "enabled": true,
+      "destination": "datadog",
+      "include_request_details": true,
+      "sensitive_headers": [
+        "authorization",
+        "cookie",
+        "x-api-key"
+      ],
+      "log_format": {
+        "timestamp": true,
+        "client_ip": true,
+        "request_id": true,
+        "rule_id": true,
+        "action_taken": true,
+        "geo_location": true,
+        "attack_type": true,
+        "severity": true
+      }
+    },
+    "alerts": {
+      "enabled": true,
+      "channels": [
+        "slack",
+        "email",
+        "pagerduty"
+      ],
+      "thresholds": {
+        "blocked_requests": 100,
+        "attack_attempts": 50,
+        "authentication_failures": 25,
+        "ddos_attempts": 1000
+      },
+      "severity_levels": {
+        "critical": {
+          "response_time": 15,
+          "notification_channels": [
+            "slack",
+            "pagerduty"
+          ]
+        },
+        "warning": {
+          "response_time": 30,
+          "notification_channels": [
+            "slack",
+            "email"
+          ]
+        }
+      }
+    },
+    "metrics": {
+      "enabled": true,
+      "collection_interval": 60,
+      "retention_days": 30,
+      "tracked_metrics": [
+        "blocked_requests_count",
+        "attack_attempts_by_type",
+        "ip_reputation_scores",
+        "rate_limit_violations",
+        "response_times",
+        "rule_effectiveness"
+      ]
+    }
+  },
+  "exports": [
+    {
+      "name": "wafConfig",
+      "type": "object",
+      "members_exposed": [
+        {
+          "member_name": "rules",
+          "member_type": "WAFRules",
+          "export_type": "named"
+        },
+        {
+          "member_name": "monitoring",
+          "member_type": "MonitoringConfig",
+          "export_type": "named"
+        }
+      ],
+      "purpose": "Export WAF configuration for infrastructure deployment"
+    }
+  ]
+}
