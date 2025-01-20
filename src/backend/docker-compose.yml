@@ -1,0 +1,304 @@
+version: "3.8"
+
+################################################################################
+# Docker Compose configuration file for orchestrating the development environment
+# containers: the backend service (API), PostgreSQL database, Redis cache, and
+# MailHog for email testing. This setup is derived from the technical specification
+# and JSON requirements, ensuring enterprise-grade detail, security, and scalability.
+# ------------------------------------------------------------------------------
+# Provides:
+#   - Node.js backend (API) built from Dockerfile (internal import):
+#       * Dockerfile reference: "src/backend/Dockerfile"
+#   - PostgreSQL 15 (postgres:15-alpine) for database operations
+#   - Redis 7 (redis:7-alpine) for caching
+#   - MailHog (mailhog/mailhog:latest) for testing outbound emails
+#
+# Volumes:
+#   - postgres_data  => Persistent storage for PostgreSQL data
+#   - redis_data     => Persistent storage for Redis data
+#   - node_modules   => Caching Node.js dependencies for local dev
+#
+# Network:
+#   - app_network    => A custom bridge network facilitating inter-container communication
+################################################################################
+
+services:
+
+  ##############################################################################
+  # SERVICE: api
+  # ----------------------------------------------------------------------------
+  # Description: The main backend API service for the B2B Sales Intelligence and
+  # Engagement Platform. It is built using the Dockerfile in the same directory.
+  # ----------------------------------------------------------------------------
+  api:
+    # --------------------------------------------------------------------------
+    # Builds from our local Dockerfile using the 'development' build target.
+    # context: The build context (current directory).
+    # dockerfile: The relative path to the Dockerfile.
+    # target: The named target defined within the Dockerfile ("development").
+    # --------------------------------------------------------------------------
+    build:
+      context: .
+      dockerfile: Dockerfile
+      target: development
+
+    # --------------------------------------------------------------------------
+    # Exposes container ports to the host machine:
+    #  8000:8000 => The main application port for HTTP traffic
+    #  9229:9229 => Node.js debugger port for local debugging
+    # --------------------------------------------------------------------------
+    ports:
+      - "8000:8000"
+      - "9229:9229"
+
+    # --------------------------------------------------------------------------
+    # Mount volumes for local development:
+    #  1) Bind-mount of the current directory into /usr/src/app to enable
+    #     iterative code changes without rebuilding the container.
+    #  2) node_modules volume to cache dependencies, preventing conflicts between
+    #     the host file system and container.
+    # --------------------------------------------------------------------------
+    volumes:
+      - type: bind
+        source: .
+        target: /usr/src/app
+      - type: volume
+        source: node_modules
+        target: /usr/src/app/node_modules
+
+    # --------------------------------------------------------------------------
+    # Environment variables needed for local development. Derived from the
+    # .env.example file and set for a dev environment. Note that sensitive
+    # values (like passwords) would typically be managed via a .env file in
+    # production.
+    # --------------------------------------------------------------------------
+    environment:
+      - NODE_ENV=development
+      - PORT=8000
+      - DATABASE_URL=postgresql://postgres:postgres@db:5432/sales_platform
+      - REDIS_HOST=cache
+      - REDIS_PORT=6379
+      - SMTP_HOST=mailhog
+      - SMTP_PORT=1025
+      - DEBUG=app:*
+
+    # --------------------------------------------------------------------------
+    # This container depends on the database (db), cache (cache), and mailhog
+    # services. Docker Compose ensures these services start before the API.
+    # --------------------------------------------------------------------------
+    depends_on:
+      - db
+      - cache
+      - mailhog
+
+    # --------------------------------------------------------------------------
+    # A healthcheck to verify the API is up and responding. The command attempts
+    # to perform an HTTP GET on the /health endpoint. If it fails, Docker marks
+    # the container as unhealthy.
+    #
+    #   interval: 30s  => Frequency of the healthcheck
+    #   timeout: 10s   => Time to wait for a response
+    #   retries: 3     => Times to retry before marking unhealthy
+    # --------------------------------------------------------------------------
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+    # --------------------------------------------------------------------------
+    # Attach this service to our custom bridge network for inter-container
+    # communication.
+    # --------------------------------------------------------------------------
+    networks:
+      - app_network
+
+  ##############################################################################
+  # SERVICE: db
+  # ----------------------------------------------------------------------------
+  # Description: PostgreSQL database container for data persistence.
+  # ----------------------------------------------------------------------------
+  db:
+    # --------------------------------------------------------------------------
+    # Pulls the official PostgreSQL 15 Alpine image from Docker Hub.
+    # # postgres version 15-alpine
+    # --------------------------------------------------------------------------
+    image: "postgres:15-alpine"
+
+    # --------------------------------------------------------------------------
+    # Exposes the default PostgreSQL port 5432 on the host side for database
+    # connections from the host machine or other containers.
+    # --------------------------------------------------------------------------
+    ports:
+      - "5432:5432"
+
+    # --------------------------------------------------------------------------
+    # Persists PostgreSQL data to the postgres_data named volume so that data
+    # is retained across container restarts.
+    # --------------------------------------------------------------------------
+    volumes:
+      - type: volume
+        source: postgres_data
+        target: /var/lib/postgresql/data
+
+    # --------------------------------------------------------------------------
+    # Basic environment variables for PostgreSQL initialization.
+    #   POSTGRES_DB           => Default database name
+    #   POSTGRES_USER         => Default superuser name
+    #   POSTGRES_PASSWORD     => Password for the above superuser
+    #   POSTGRES_INITDB_ARGS  => Additional arguments (e.g., scram-sha-256 auth)
+    # --------------------------------------------------------------------------
+    environment:
+      - POSTGRES_DB=sales_platform
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_INITDB_ARGS=--auth-host=scram-sha-256
+
+    # --------------------------------------------------------------------------
+    # Healthcheck for PostgreSQL. Uses pg_isready to check if the database is
+    # accepting connections. Configured to retry multiple times before failing.
+    # --------------------------------------------------------------------------
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    # --------------------------------------------------------------------------
+    # Joins the same custom network as the API and other containers, enabling
+    # internal DNS resolution (i.e., "db" resolves within the Docker network).
+    # --------------------------------------------------------------------------
+    networks:
+      - app_network
+
+  ##############################################################################
+  # SERVICE: cache
+  # ----------------------------------------------------------------------------
+  # Description: Redis cache for performance optimization and ephemeral data.
+  # ----------------------------------------------------------------------------
+  cache:
+    # --------------------------------------------------------------------------
+    # Pulls the official Redis 7 Alpine image from Docker Hub.
+    # # redis version 7-alpine
+    # --------------------------------------------------------------------------
+    image: "redis:7-alpine"
+
+    # --------------------------------------------------------------------------
+    # Exposes port 6379 on the host machine, allowing local connections for
+    # debugging or external testing.
+    # --------------------------------------------------------------------------
+    ports:
+      - "6379:6379"
+
+    # --------------------------------------------------------------------------
+    # Uses a named volume to persist Redis Append Only File (AOF) logs, ensuring
+    # data durability across container restarts (helpful in dev scenarios).
+    # --------------------------------------------------------------------------
+    volumes:
+      - type: volume
+        source: redis_data
+        target: /data
+
+    # --------------------------------------------------------------------------
+    # Custom Redis configuration flags:
+    #   --appendonly yes        => Enable data persistence via Append Only File
+    #   --maxmemory 512mb       => Limit memory usage to 512MB
+    #   --maxmemory-policy allkeys-lru => Evict keys using LRU when max memory
+    # --------------------------------------------------------------------------
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "512mb", "--maxmemory-policy", "allkeys-lru"]
+
+    # --------------------------------------------------------------------------
+    # Healthcheck for Redis. Attempts a "redis-cli ping". If it doesn't receive
+    # a "PONG", Redis is deemed not ready or unhealthy.
+    # --------------------------------------------------------------------------
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    # --------------------------------------------------------------------------
+    # Connects to the same application-wide network for container communication.
+    # --------------------------------------------------------------------------
+    networks:
+      - app_network
+
+  ##############################################################################
+  # SERVICE: mailhog
+  # ----------------------------------------------------------------------------
+  # Description: A simple email testing service. MailHog captures outgoing emails
+  # and provides a web UI (port 8025) to inspect them.
+  # ----------------------------------------------------------------------------
+  mailhog:
+    # --------------------------------------------------------------------------
+    # Pulls the MailHog image at the latest version from Docker Hub.
+    # # mailhog version latest
+    # --------------------------------------------------------------------------
+    image: "mailhog/mailhog:latest"
+
+    # --------------------------------------------------------------------------
+    # Exposes:
+    #   1025: SMTP port for capturing emails
+    #   8025: HTTP web interface for browsing captured mails
+    # --------------------------------------------------------------------------
+    ports:
+      - "1025:1025"
+      - "8025:8025"
+
+    # --------------------------------------------------------------------------
+    # Basic healthcheck for MailHog, verifying that port 1025 is accessible
+    # via netcat (nc). If it is not listening, the container is unhealthy.
+    # --------------------------------------------------------------------------
+    healthcheck:
+      test: ["CMD", "nc", "-z", "localhost", "1025"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+    # --------------------------------------------------------------------------
+    # Joins the custom app_network to interface with the API container (for SMTP).
+    # --------------------------------------------------------------------------
+    networks:
+      - app_network
+
+################################################################################
+# Named volumes for data persistence and node_modules caching
+################################################################################
+volumes:
+  # --------------------------------------------------------------------------
+  # postgres_data stores the actual PostgreSQL data files in /var/lib/postgresql/data
+  # so that container restarts do not wipe the database state (development convenience).
+  # --------------------------------------------------------------------------
+  postgres_data:
+    name: postgres_data
+
+  # --------------------------------------------------------------------------
+  # redis_data holds Redis AOF logs or ephemeral data. In production, additional
+  # fine-tuning may be required, but for dev, it ensures partial persistence.
+  # --------------------------------------------------------------------------
+  redis_data:
+    name: redis_data
+
+  # --------------------------------------------------------------------------
+  # node_modules caches Node.js dependencies used by the API service. This is
+  # beneficial in dev to avoid re-installing modules on each container rebuild.
+  # --------------------------------------------------------------------------
+  node_modules:
+    name: node_modules
+
+################################################################################
+# Custom bridge network for the application, enabling inter-container DNS-based
+# service discovery and isolated traffic for these services.
+################################################################################
+networks:
+  app_network:
+    driver: bridge
+    # --------------------------------------------------------------------------
+    # driver_opts allow customizing the underlying docker network. For instance,
+    # giving it a specific bridge name, enabling inter-container communication
+    # (icc), and IP masquerade.
+    # --------------------------------------------------------------------------
+    driver_opts:
+      com.docker.network.bridge.name: "sales_platform_net"
+      com.docker.network.bridge.enable_icc: "true"
+      com.docker.network.bridge.enable_ip_masquerade: "true"
