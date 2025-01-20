@@ -1,0 +1,155 @@
+Proprietary Software License
+Version: 1.0.0
+Last Updated: 2024
+
+================================================================================
+1. COPYRIGHT_NOTICE
+================================================================================
+This B2B Sales Intelligence and Engagement Platform (the “Software”) is the sole
+and exclusive property of its author(s) (“Licensor”). All rights, title, and
+interest in and to the Software, including all intellectual property rights, are
+and shall remain exclusively with the Licensor. Unauthorized copying,
+distribution, or modification of the Software, in whole or in part, is strictly
+prohibited without prior written consent from the Licensor.
+
+================================================================================
+2. USAGE_TERMS
+================================================================================
+(a) Grant of License
+   Subject to the terms herein, Licensor grants you a non-exclusive,
+   non-transferable, revocable license to install, access, and use the Software
+   solely for legitimate business purposes within an enterprise B2B environment.
+
+(b) Restrictions
+   You shall not (i) modify, reverse engineer, decompile, or disassemble the
+   Software, (ii) remove or alter any proprietary notices or labels, (iii) use
+   the Software to develop competing products or services, or (iv) sublicense,
+   rent, lease, loan, or otherwise distribute the Software to any third party
+   without express written permission from the Licensor.
+
+(c) Enterprise Usage
+   This license is specifically intended for enterprise-level businesses
+   requiring AI-powered lead discovery, data enrichment, automated outreach,
+   and CRM integrations. Any use outside the scope defined herein shall require
+   separate licensing and written permission from the Licensor.
+
+================================================================================
+3. DATA_PROTECTION_TERMS
+================================================================================
+(a) Data Handling
+   The Software may handle personal data, lead data, or any other sensitive
+   information provided by users or integrated systems. Licensee agrees that it
+   is solely responsible for implementing appropriate operational, technical,
+   and organizational measures to adequately protect such data.
+
+(b) Encryption
+   Licensee must employ encryption methods, including AES-256-GCM or stronger,
+   to secure data at rest and TLS 1.3 or equivalent to protect data in transit.
+   Any additional encryption at the field or record level, especially for
+   personally identifiable information (PII), shall be the responsibility of
+   Licensee.
+
+(c) Retention and Deletion
+   Licensee shall retain, archive, or delete data in accordance with applicable
+   data protection regulations and best practices. The Licensor assumes no
+   responsibility for Licensee’s data retention obligations.
+
+================================================================================
+4. API_USAGE_TERMS
+================================================================================
+(a) API Access
+   Where the Software offers APIs for lead enrichment, campaign automation,
+   analytics, or other functionalities, Licensee may only access and use such
+   APIs within the limits specified by Licensor’s documentation, usage
+   guidelines, or rate limits.
+
+(b) Abuse Prevention
+   Licensee shall not use the APIs in a manner that (i) disrupts the availability
+   of the Software or associated services, (ii) introduces malicious code or
+   viruses, or (iii) circumvents any technical controls put in place by Licensor
+   to protect its platform.
+
+(c) Integration with Third-Party Services
+   The Software may integrate with external services (e.g., OpenAI, Resend,
+   Stripe, Supabase). Licensee acknowledges that any such integrations are
+   subject to separate terms and conditions provided by the third-party service
+   providers.
+
+================================================================================
+5. SERVICE_LEVEL_TERMS
+================================================================================
+(a) Uptime Commitment
+   The Software, when hosted or managed by Licensor, is designed to operate with
+   commercially reasonable uptime. Though Licensor endeavors to maintain high
+   availability, no guarantee is made as to uninterrupted service unless
+   separately agreed in a service-level agreement.
+
+(b) Maintenance Windows
+   Licensor may schedule routine maintenance and updates during off-peak hours.
+   Licensee shall be notified of scheduled downtime that materially impacts the
+   availability of critical functions in advance.
+
+(c) Support and Updates
+   Licensor provides updates and technical support through designated channels
+   and within designated support hours. Scope and response times may vary based
+   on support level purchased or agreed upon in a separate written agreement.
+
+================================================================================
+6. COMPLIANCE_REQUIREMENTS
+================================================================================
+(a) SOC 2
+   Licensor implements industry-standard security controls to align with SOC 2
+   principles. Licensee shall ensure that it handles the Software’s output and
+   data in a manner that does not compromise the integrity or security posture
+   of these controls.
+
+(b) GDPR
+   The Software is designed to facilitate compliance with GDPR, particularly in
+   regard to consent management, right to erasure, and data subject rights.
+   However, ultimate compliance with GDPR rests with the Licensee, who must
+   configure and operate the Software appropriately.
+
+(c) CCPA
+   The Software can accommodate CCPA data requests (e.g., right to access, right
+   to deletion) upon Licensee’s proper configuration. Licensee is responsible
+   for deploying the Software in a manner that meets all relevant CCPA legal
+   obligations.
+
+(d) Security Compliance
+   Licensee shall adopt and enforce authentication, authorization, and data
+   security controls in line with the Software’s recommended configurations.
+   Failure to implement these controls may void any implied or explicit
+   warranties regarding legal compliance.
+
+================================================================================
+7. LIABILITY_DISCLAIMERS
+================================================================================
+(a) Disclaimer of Warranties
+   THE SOFTWARE IS PROVIDED “AS IS” WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+   IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+   FITNESS FOR A PARTICULAR PURPOSE, AND NON-INFRINGEMENT. LICENSOR MAKES NO
+   WARRANTY THAT THE SOFTWARE WILL BE ERROR-FREE OR FREE FROM INTERRUPTIONS,
+   FAILURES, OR VULNERABILITIES.
+
+(b) Limitation of Liability
+   IN NO EVENT SHALL LICENSOR, ITS AFFILIATES, OR ANY OF ITS LICENSORS OR
+   SUPPLIERS BE LIABLE FOR ANY INDIRECT, SPECIAL, INCIDENTAL, OR CONSEQUENTIAL
+   DAMAGES (INCLUDING, BUT NOT LIMITED TO, LOST PROFITS, LOSS OF DATA, OR LOSS
+   OF USE) ARISING OUT OF OR RELATED TO THE SOFTWARE OR THE USE THEREOF, WHETHER
+   BASED ON CONTRACT, TORT, OR ANY OTHER LEGAL THEORY, EVEN IF LICENSOR HAS BEEN
+   ADVISED OF THE POSSIBILITY OF SUCH DAMAGES. THE TOTAL AGGREGATE LIABILITY OF
+   LICENSOR FOR ALL CLAIMS UNDER OR RELATING TO THIS LICENSE SHALL NOT EXCEED
+   THE FEES PAID BY LICENSEE TO LICENSOR DURING THE TWELVE (12) MONTHS PRECEDING
+   THE EVENT GIVING RISE TO LIABILITY.
+
+(c) Indemnification
+   Licensee shall defend, indemnify, and hold harmless Licensor from and against
+   any claims, liabilities, damages, judgments, and expenses (including
+   reasonable attorneys’ fees) arising out of or related to (i) Licensee’s use
+   of the Software, (ii) Licensee’s breach of this License, or (iii) any data
+   protection or privacy-related claims resulting from Licensee’s configuration
+   or operation of the Software.
+
+================================================================================
+END OF LICENSE
+================================================================================
