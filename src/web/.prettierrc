@@ -1,0 +1,115 @@
+/**
+ * Prettier configuration for the Next.js frontend application.
+ * 
+ * External import reference:
+ * Prettier (version ^3.0.0) - Core formatting engine.
+ * 
+ * This file enforces a standardized code style across the project,
+ * integrating with ESLint and providing guidelines for VS Code and Git hooks.
+ */
+
+module.exports = {
+  // Enforces use of semicolons at the end of statements
+  semi: true,
+
+  // Prefers single quotes for strings
+  singleQuote: true,
+
+  // Sets the number of spaces per indentation
+  tabWidth: 2,
+
+  // Disables tab characters for indentation
+  useTabs: false,
+
+  // Wraps lines at 100 characters
+  printWidth: 100,
+
+  // Ensures trailing commas in ES5-compatible syntax
+  trailingComma: 'es5',
+
+  // Adds spaces between brackets in object literals
+  bracketSpacing: true,
+
+  // Places the closing bracket of a JSX element on its own line
+  bracketSameLine: false,
+
+  // Omits parentheses when there is only one parameter to an arrow function
+  arrowParens: 'avoid',
+
+  // Uses line-feed for end-of-line
+  endOfLine: 'lf',
+
+  // Keeps double quotes for JSX attributes
+  jsxSingleQuote: false,
+
+  // Preserves formatting for prose in Markdown files by default
+  proseWrap: 'preserve',
+
+  // Only quotes object properties when necessary
+  quoteProps: 'as-needed',
+
+  // Automatically formats embedded code
+  embeddedLanguageFormatting: 'auto',
+
+  // File-specific overrides for specialized formatting rules
+  overrides: [
+    {
+      // Applies TypeScript parser for .ts/.tsx files
+      files: ['*.ts', '*.tsx'],
+      options: {
+        parser: 'typescript'
+      }
+    },
+    {
+      // Enforces wrapping for Markdown files
+      files: ['*.md'],
+      options: {
+        proseWrap: 'always'
+      }
+    },
+    {
+      // Uses the JSON parser for .json files
+      files: ['*.json'],
+      options: {
+        parser: 'json'
+      }
+    }
+  ],
+
+  /**
+   * Integration details to ensure Prettier aligns with ESLint,
+   * VS Code, and Git-based workflows.
+   */
+  integration: {
+    // ESLint settings for Prettier
+    eslint: {
+      extends: ['prettier'],
+      plugins: ['prettier'],
+      rules: {
+        'prettier/prettier': 'error'
+      }
+    },
+
+    // VS Code editor settings for automatic formatting
+    vscode: {
+      'editor.formatOnSave': true,
+      'editor.defaultFormatter': 'esbenp.prettier-vscode'
+    },
+
+    // Git hooks to run Prettier actions on commit and push
+    git: {
+      'pre-commit': 'prettier --write',
+      'pre-push': 'prettier --check'
+    }
+  },
+
+  /**
+   * Maintenance configuration for periodic updates,
+   * version control, and documentation tracking.
+   */
+  maintenance: {
+    update_frequency: 'Monthly',
+    version_control: 'Git tracked',
+    documentation: 'Maintained in team docs'
+  }
+};
