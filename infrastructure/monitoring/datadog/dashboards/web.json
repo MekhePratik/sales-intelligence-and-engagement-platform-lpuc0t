@@ -1,0 +1,276 @@
+{
+  "dashboard_config": {
+    "title": "B2B Sales Platform Web Dashboard",
+    "description": "Comprehensive monitoring dashboard for web application performance, user experience, and business metrics",
+    "layout_type": "ordered",
+    "widgets": [
+      {
+        "name": "Core Web Vitals",
+        "type": "group",
+        "layout": {
+          "height": 4,
+          "width": 12,
+          "x": 0,
+          "y": 0
+        },
+        "widgets": [
+          {
+            "name": "Largest Contentful Paint",
+            "type": "timeseries",
+            "query": "avg:web.core_web_vitals.lcp{service:b2b-sales-platform} by {page_path}.rollup(avg, 60)",
+            "viz_type": "line",
+            "title": "LCP by Page",
+            "time": {
+              "live_span": "1h"
+            },
+            "markers": [
+              {
+                "value": "2000",
+                "label": "Warning",
+                "type": "warning"
+              },
+              {
+                "value": "2500",
+                "label": "Critical",
+                "type": "error"
+              }
+            ]
+          },
+          {
+            "name": "First Input Delay",
+            "type": "timeseries",
+            "query": "avg:web.core_web_vitals.fid{service:b2b-sales-platform} by {page_path}.rollup(avg, 60)",
+            "viz_type": "line",
+            "title": "FID by Page",
+            "time": {
+              "live_span": "1h"
+            },
+            "markers": [
+              {
+                "value": "80",
+                "label": "Warning",
+                "type": "warning"
+              },
+              {
+                "value": "100",
+                "label": "Critical",
+                "type": "error"
+              }
+            ]
+          },
+          {
+            "name": "Cumulative Layout Shift",
+            "type": "timeseries",
+            "query": "avg:web.core_web_vitals.cls{service:b2b-sales-platform} by {page_path}.rollup(avg, 60)",
+            "viz_type": "line",
+            "title": "CLS by Page",
+            "time": {
+              "live_span": "1h"
+            },
+            "markers": [
+              {
+                "value": "0.08",
+                "label": "Warning",
+                "type": "warning"
+              },
+              {
+                "value": "0.1",
+                "label": "Critical",
+                "type": "error"
+              }
+            ]
+          }
+        ]
+      },
+      {
+        "name": "Performance Metrics",
+        "type": "group",
+        "layout": {
+          "height": 4,
+          "width": 6,
+          "x": 0,
+          "y": 4
+        },
+        "widgets": [
+          {
+            "name": "Time to First Byte",
+            "type": "timeseries",
+            "query": "avg:web.performance.ttfb{service:b2b-sales-platform} by {page_path}.rollup(avg, 60)",
+            "viz_type": "line",
+            "title": "TTFB by Page",
+            "time": {
+              "live_span": "1h"
+            }
+          },
+          {
+            "name": "Bundle Size",
+            "type": "timeseries",
+            "query": "avg:web.bundle.size{service:b2b-sales-platform} by {chunk_name}.rollup(avg, 60)",
+            "viz_type": "line",
+            "title": "Bundle Size by Chunk",
+            "time": {
+              "live_span": "1h"
+            }
+          }
+        ]
+      },
+      {
+        "name": "Error Monitoring",
+        "type": "group",
+        "layout": {
+          "height": 4,
+          "width": 6,
+          "x": 6,
+          "y": 4
+        },
+        "widgets": [
+          {
+            "name": "Error Rate",
+            "type": "timeseries",
+            "query": "sum:web.errors.count{service:b2b-sales-platform} by {error_type}.rollup(sum, 60)",
+            "viz_type": "line",
+            "title": "Error Rate by Type",
+            "time": {
+              "live_span": "1h"
+            }
+          },
+          {
+            "name": "Client-Side Exceptions",
+            "type": "toplist",
+            "query": "top(sum:web.errors.count{service:b2b-sales-platform} by {error_message}.rollup(sum, 300), 10, 'sum', 'desc')",
+            "title": "Top Client-Side Errors"
+          }
+        ]
+      },
+      {
+        "name": "Business KPIs",
+        "type": "group",
+        "layout": {
+          "height": 4,
+          "width": 12,
+          "x": 0,
+          "y": 8
+        },
+        "widgets": [
+          {
+            "name": "User Adoption",
+            "type": "query_value",
+            "query": "avg:business.user.adoption.rate{service:b2b-sales-platform}.rollup(avg, 300)",
+            "title": "User Adoption Rate",
+            "precision": 2,
+            "unit": "%",
+            "conditional_formats": [
+              {
+                "comparator": "<",
+                "value": 60,
+                "palette": "red"
+              },
+              {
+                "comparator": "<",
+                "value": 70,
+                "palette": "yellow"
+              },
+              {
+                "comparator": ">=",
+                "value": 70,
+                "palette": "green"
+              }
+            ]
+          },
+          {
+            "name": "Lead Conversion",
+            "type": "query_value",
+            "query": "avg:business.lead.conversion.rate{service:b2b-sales-platform}.rollup(avg, 300)",
+            "title": "Lead Conversion Rate",
+            "precision": 2,
+            "unit": "%",
+            "conditional_formats": [
+              {
+                "comparator": "<",
+                "value": 25,
+                "palette": "red"
+              },
+              {
+                "comparator": "<",
+                "value": 35,
+                "palette": "yellow"
+              },
+              {
+                "comparator": ">=",
+                "value": 35,
+                "palette": "green"
+              }
+            ]
+          },
+          {
+            "name": "Time Savings",
+            "type": "query_value",
+            "query": "avg:business.time.savings.percentage{service:b2b-sales-platform}.rollup(avg, 300)",
+            "title": "Time Savings",
+            "precision": 2,
+            "unit": "%",
+            "conditional_formats": [
+              {
+                "comparator": "<",
+                "value": 40,
+                "palette": "red"
+              },
+              {
+                "comparator": "<",
+                "value": 50,
+                "palette": "yellow"
+              },
+              {
+                "comparator": ">=",
+                "value": 50,
+                "palette": "green"
+              }
+            ]
+          }
+        ]
+      }
+    ],
+    "template_variables": [
+      {
+        "name": "environment",
+        "prefix": "env",
+        "default": "production"
+      },
+      {
+        "name": "service",
+        "prefix": "service",
+        "default": "b2b-sales-platform"
+      }
+    ],
+    "tags": [
+      "service:b2b-sales-platform",
+      "env:${environment}",
+      "dashboard_type:web"
+    ],
+    "refresh_rate": "30s"
+  },
+  "exports": [
+    {
+      "name": "dashboard_config",
+      "type": "object",
+      "members_exposed": [
+        {
+          "member_name": "title",
+          "member_type": "string",
+          "export_type": "named"
+        },
+        {
+          "member_name": "widgets",
+          "member_type": "array",
+          "export_type": "named"
+        },
+        {
+          "member_name": "template_variables",
+          "member_type": "array",
+          "export_type": "named"
+        }
+      ],
+      "purpose": "DataDog dashboard configuration for web application monitoring"
+    }
+  ]
+}
