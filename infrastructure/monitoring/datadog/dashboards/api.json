@@ -1,0 +1,287 @@
+{
+  /* -------------------------------------------------------------------------- */
+  /* External Dependencies                                                      */
+  /* -------------------------------------------------------------------------- */
+  /* Using @datadog/datadog-api-client ^1.0.0 for DataDog API management.       */
+
+  /* -------------------------------------------------------------------------- */
+  /* Internal Imports                                                           */
+  /* -------------------------------------------------------------------------- */
+  /* Leveraging PERFORMANCE_METRICS from src/backend/src/constants/metrics.ts   */
+  /* Specifically using:                                                        */
+  /*  - API_RESPONSE_TIME => "api_response_time_ms"                             */
+  /*  - DB_QUERY_TIME    => "db_query_time_ms"                                  */
+  /*  - ERROR_RATE       => "error_rate_percent"                                */
+
+  /* -------------------------------------------------------------------------- */
+  /* Dashboard Configuration                                                    */
+  /* -------------------------------------------------------------------------- */
+  "title": "B2B Sales Platform API Dashboard",
+  "description": "Comprehensive monitoring dashboard for API performance, health metrics, and business KPIs",
+  "layout_type": "ordered",
+
+  /* -------------------------------------------------------------------------- */
+  /* Widgets Array                                                              */
+  /* -------------------------------------------------------------------------- */
+  "widgets": [
+    {
+      "name": "API Health Overview",
+      "type": "group",
+      "layout": {
+        "height": 4,
+        "width": 12,
+        "x": 0,
+        "y": 0
+      },
+      "widgets": [
+        {
+          "name": "API Response Time",
+          "type": "timeseries",
+          /* Replacing "api.response.time" with PERFORMANCE_METRICS.API_RESPONSE_TIME */
+          "query": "avg:api_response_time_ms{service:b2b-sales-platform} by {endpoint}.rollup(avg, 60)",
+          "viz_type": "line",
+          "title": "API Response Time by Endpoint",
+          "time": {
+            "live_span": "1h"
+          },
+          "markers": [
+            {
+              "value": "200",
+              "label": "Warning",
+              "type": "warning"
+            },
+            {
+              "value": "500",
+              "label": "Critical",
+              "type": "error"
+            }
+          ]
+        },
+        {
+          "name": "Error Rate",
+          "type": "timeseries",
+          /* Replacing "api.error.rate" with PERFORMANCE_METRICS.ERROR_RATE */
+          "query": "sum:error_rate_percent{service:b2b-sales-platform} by {endpoint}.rollup(sum, 60)",
+          "viz_type": "line",
+          "title": "Error Rate by Endpoint",
+          "time": {
+            "live_span": "1h"
+          },
+          "markers": [
+            {
+              "value": "1",
+              "label": "Warning",
+              "type": "warning"
+            },
+            {
+              "value": "5",
+              "label": "Critical",
+              "type": "error"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Database Performance",
+      "type": "group",
+      "layout": {
+        "height": 4,
+        "width": 6,
+        "x": 0,
+        "y": 4
+      },
+      "widgets": [
+        {
+          "name": "Query Performance",
+          "type": "timeseries",
+          /* Replacing "db.query.time" with PERFORMANCE_METRICS.DB_QUERY_TIME */
+          "query": "avg:db_query_time_ms{service:b2b-sales-platform} by {query_type}.rollup(avg, 60)",
+          "viz_type": "line",
+          "title": "Database Query Time",
+          "time": {
+            "live_span": "1h"
+          },
+          "markers": [
+            {
+              "value": "50",
+              "label": "Warning",
+              "type": "warning"
+            },
+            {
+              "value": "100",
+              "label": "Critical",
+              "type": "error"
+            }
+          ]
+        },
+        {
+          "name": "Cache Hit Rate",
+          "type": "timeseries",
+          "query": "avg:cache.hit.rate{service:b2b-sales-platform}.rollup(avg, 60)",
+          "viz_type": "line",
+          "title": "Cache Performance",
+          "time": {
+            "live_span": "1h"
+          },
+          "markers": [
+            {
+              "value": "80",
+              "label": "Warning",
+              "type": "warning"
+            },
+            {
+              "value": "60",
+              "label": "Critical",
+              "type": "error"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Business Metrics",
+      "type": "group",
+      "layout": {
+        "height": 4,
+        "width": 6,
+        "x": 6,
+        "y": 4
+      },
+      "widgets": [
+        {
+          "name": "Lead Conversion",
+          "type": "query_value",
+          "query": "avg:business.lead.conversion.rate{service:b2b-sales-platform}.rollup(avg, 300)",
+          "title": "Lead Conversion Rate",
+          "precision": 2,
+          "unit": "%",
+          "conditional_formats": [
+            {
+              "comparator": "<",
+              "value": 20,
+              "palette": "red"
+            },
+            {
+              "comparator": ">=",
+              "value": 40,
+              "palette": "green"
+            }
+          ]
+        },
+        {
+          "name": "Campaign Success",
+          "type": "query_value",
+          "query": "avg:business.campaign.success.rate{service:b2b-sales-platform}.rollup(avg, 300)",
+          "title": "Campaign Success Rate",
+          "precision": 2,
+          "unit": "%",
+          "conditional_formats": [
+            {
+              "comparator": "<",
+              "value": 25,
+              "palette": "red"
+            },
+            {
+              "comparator": ">=",
+              "value": 50,
+              "palette": "green"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Resource Usage",
+      "type": "group",
+      "layout": {
+        "height": 4,
+        "width": 12,
+        "x": 0,
+        "y": 8
+      },
+      "widgets": [
+        {
+          "name": "CPU Usage",
+          "type": "timeseries",
+          "query": "avg:api.cpu.usage{service:b2b-sales-platform} by {host}.rollup(avg, 60)",
+          "viz_type": "area",
+          "title": "CPU Usage by Host",
+          "time": {
+            "live_span": "1h"
+          },
+          "markers": [
+            {
+              "value": "70",
+              "label": "Warning",
+              "type": "warning"
+            },
+            {
+              "value": "90",
+              "label": "Critical",
+              "type": "error"
+            }
+          ]
+        },
+        {
+          "name": "Memory Usage",
+          "type": "timeseries",
+          "query": "avg:api.memory.usage{service:b2b-sales-platform} by {host}.rollup(avg, 60)",
+          "viz_type": "area",
+          "title": "Memory Usage by Host",
+          "time": {
+            "live_span": "1h"
+          },
+          "markers": [
+            {
+              "value": "80",
+              "label": "Warning",
+              "type": "warning"
+            },
+            {
+              "value": "95",
+              "label": "Critical",
+              "type": "error"
+            }
+          ]
+        }
+      ]
+    }
+  ],
+
+  /* -------------------------------------------------------------------------- */
+  /* Template Variables                                                         */
+  /* -------------------------------------------------------------------------- */
+  "template_variables": [
+    {
+      "name": "environment",
+      "prefix": "env",
+      "default": "production"
+    },
+    {
+      "name": "service",
+      "prefix": "service",
+      "default": "b2b-sales-platform"
+    }
+  ],
+
+  /* -------------------------------------------------------------------------- */
+  /* Dashboard Tags & Refresh Configuration                                     */
+  /* -------------------------------------------------------------------------- */
+  "tags": [
+    "service:b2b-sales-platform",
+    "env:${environment}",
+    "dashboard_type:api",
+    "monitoring:performance",
+    "team:platform"
+  ],
+  "refresh_rate": "30s",
+
+  /* -------------------------------------------------------------------------- */
+  /* Notification List                                                          */
+  /* -------------------------------------------------------------------------- */
+  "notify_list": [
+    "@pagerduty-Platform-Team",
+    "@slack-monitoring-alerts"
+  ]
+}
