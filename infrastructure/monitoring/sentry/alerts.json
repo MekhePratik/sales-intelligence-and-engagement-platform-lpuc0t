@@ -1,0 +1,276 @@
+{
+  /*
+    Sentry Alert Configuration for the B2B Sales Intelligence Platform
+    ------------------------------------------------------------------
+    This file defines alert rules, notification settings, and issue tracking
+    configurations for monitoring errors, performance issues, and security events
+    via the Sentry service.
+
+    Imports & References:
+    - @sentry/node@^7.0.0 is employed to integrate Sentry with Node.js services.
+    - Internal references to error-codes.ts provide standardized error codes:
+      * B2B_ERR_INTERNAL_SERVER_ERROR (ErrorCode.INTERNAL_SERVER_ERROR)
+      * B2B_ERR_VALIDATION_ERROR (ErrorCode.VALIDATION_ERROR)
+
+    Requirements Addressed:
+    1) Error Handling (Global error boundary, Sentry integration)
+    2) Alert Thresholds (Error rate > 1% warning, >5% critical)
+    3) Security Monitoring (Immediate alerting on security events)
+
+    JSON Structure:
+    {
+      "sentryAlerts": {
+        "alert_rules": {
+          "error_rate_alerts": [...],
+          "performance_alerts": [...],
+          "security_alerts": [...],
+          "issue_alerts": [...]
+        },
+        "notification_settings": {...},
+        "alert_grouping": {...}
+      }
+    }
+
+    Exports:
+    Exporting "sentryAlerts" as a named configuration object. This object contains:
+    - alert_rules
+    - notification_settings
+    - alert_grouping
+  */
+  "sentryAlerts": {
+    /*
+      Alert Rules
+      -----------
+      Defines fine-grained settings to trigger notifications based on error rates,
+      performance metrics, security events, and specific error codes from our
+      internal error codes module.
+    */
+    "alert_rules": {
+      /*
+        Error Rate Alerts
+        -----------------
+        Monitors the proportion of errored transactions. We use a 1% threshold for
+        warning and a 5% threshold for critical alerts. The time window of 15 minutes
+        aligns with the operational SLA for incident response.
+      */
+      "error_rate_alerts": [
+        {
+          "name": "High Error Rate Alert",
+          "type": "metric_alert",
+          "dataset": "transactions",
+          "query": "error_rate() > 0.05",
+          "timeWindow": "15m",
+          "triggers": [
+            {
+              "level": "critical",
+              "threshold": 0.05,
+              "actions": [
+                {
+                  "type": "pagerduty",
+                  "target": "backend-oncall",
+                  "frequency": "always"
+                },
+                {
+                  "type": "slack",
+                  "target": "#backend-alerts",
+                  "frequency": "always"
+                }
+              ]
+            },
+            {
+              "level": "warning",
+              "threshold": 0.01,
+              "actions": [
+                {
+                  "type": "slack",
+                  "target": "#backend-alerts",
+                  "frequency": "hourly"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      /*
+        Performance Alerts
+        ------------------
+        Observes the average transaction duration. We set 200ms for a warning threshold
+        and 500ms for a critical threshold, reflecting our target p95 performance goals.
+      */
+      "performance_alerts": [
+        {
+          "name": "API Response Time Alert",
+          "type": "metric_alert",
+          "dataset": "transactions",
+          "query": "avg(transaction.duration) > 500",
+          "timeWindow": "5m",
+          "triggers": [
+            {
+              "level": "critical",
+              "threshold": 500,
+              "actions": [
+                {
+                  "type": "pagerduty",
+                  "target": "backend-oncall",
+                  "frequency": "always"
+                }
+              ]
+            },
+            {
+              "level": "warning",
+              "threshold": 200,
+              "actions": [
+                {
+                  "type": "slack",
+                  "target": "#performance-alerts",
+                  "frequency": "hourly"
+                }
+              ]
+            }
+          ]
+        }
+      ],
+      /*
+        Security Alerts
+        ---------------
+        Focuses on authentication failures and designated "security" type events. Any
+        sign of recurring login or auth issues triggers an immediate alert.
+      */
+      "security_alerts": [
+        {
+          "name": "Authentication Failure Alert",
+          "type": "issue_alert",
+          "conditions": [
+            {
+              "type": "event.type",
+              "value": "security"
+            },
+            {
+              "type": "event.tags[auth_failure]",
+              "value": true
+            }
+          ],
+          "actions": [
+            {
+              "type": "slack",
+              "target": "#security-alerts",
+              "frequency": "always"
+            },
+            {
+              "type": "pagerduty",
+              "target": "security-oncall",
+              "frequency": "always"
+            }
+          ]
+        }
+      ],
+      /*
+        Issue Alerts Referencing Internal Error Codes
+        ---------------------------------------------
+        Specific alerts for internal server errors and validation errors, leveraging
+        B2B_ERR_INTERNAL_SERVER_ERROR and B2B_ERR_VALIDATION_ERROR from error-codes.ts.
+      */
+      "issue_alerts": [
+        {
+          "name": "Internal Server Error Alert",
+          "type": "issue_alert",
+          "conditions": [
+            {
+              "type": "event.tags[error_code]",
+              "value": "B2B_ERR_INTERNAL_SERVER_ERROR"
+            }
+          ],
+          "actions": [
+            {
+              "type": "slack",
+              "target": "#backend-alerts",
+              "frequency": "always"
+            },
+            {
+              "type": "pagerduty",
+              "target": "backend-oncall",
+              "frequency": "always"
+            }
+          ]
+        },
+        {
+          "name": "Validation Error Alert",
+          "type": "issue_alert",
+          "conditions": [
+            {
+              "type": "event.tags[error_code]",
+              "value": "B2B_ERR_VALIDATION_ERROR"
+            }
+          ],
+          "actions": [
+            {
+              "type": "slack",
+              "target": "#backend-alerts",
+              "frequency": "hourly"
+            }
+          ]
+        }
+      ]
+    },
+    /*
+      Notification Settings
+      ---------------------
+      Sets default routing channels for all alert severities and defines daily/weekly
+      digest settings for summary reports. In an enterprise environment, these robust
+      distribution methods ensure timely updates to all stakeholders.
+    */
+    "notification_settings": {
+      "default_routing": {
+        "all": "#monitoring-alerts",
+        "error": "backend-team@company.com",
+        "critical": "pagerduty:backend-oncall",
+        "security": "security-team@company.com"
+      },
+      "digests": {
+        "daily": {
+          "time": "09:00:00",
+          "timezone": "UTC",
+          "recipients": [
+            "platform-team@company.com",
+            "engineering-leads@company.com"
+          ]
+        },
+        "weekly": {
+          "day": "Monday",
+          "time": "10:00:00",
+          "timezone": "UTC",
+          "recipients": [
+            "engineering-leads@company.com",
+            "cto@company.com"
+          ]
+        }
+      }
+    },
+    /*
+      Alert Grouping
+      --------------
+      Provides advanced grouping rules to consolidate similar alerts into a single
+      notification stream (by service, environment, or error type), reducing noise
+      and improving triage efficiency.
+    */
+    "alert_grouping": {
+      "rules": [
+        {
+          "type": "service",
+          "pattern": "service:*",
+          "group": "{{service}}"
+        },
+        {
+          "type": "environment",
+          "pattern": "environment:*",
+          "group": "{{environment}}"
+        },
+        {
+          "type": "error_type",
+          "pattern": "type:*",
+          "group": "{{error_type}}"
+        }
+      ]
+    }
+  }
+}
