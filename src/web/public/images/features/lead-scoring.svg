@@ -1,0 +1,87 @@
+<!-- 
+  ============================================================================================
+  Lead Scoring Feature Illustration (SVG)
+  --------------------------------------------------------------------------------------------
+  • File Path: src/web/public/images/features/lead-scoring.svg
+  • Description: Vector graphic illustrating AI-powered lead scoring and prioritization.
+  • Requirements Addressed:
+      1) Lead Scoring Visualization (Core Features/Lead Management)
+      2) Design System Compliance (Color palette: #2563eb, #64748b, #0ea5e9, with dark mode)
+  • Image Specifications:
+      - Format: SVG (scalable vector)
+      - Dimensions: Responsive (min 64px, max 256px), preserves aspect ratio
+      - Accessibility: role="img", <title>, <desc>, alt_text for screen readers
+      - Dark Mode: Uses CSS variables (var(--color-*)) with fallback hex values
+      - Performance: Under 10KB target, compressed paths, minimal code
+      - Browser Support: Chrome 49+, Firefox 53+, Safari 10+, Edge 79+ (PNG fallback possible)
+  --------------------------------------------------------------------------------------------
+  Note: This SVG uses arcs to represent four categories of lead scores (low, medium, high,
+  excellent), each assigned a design system color or fallback. The text in the center reads
+  "Lead Score" to reinforce the feature’s purpose. 
+  ============================================================================================
+-->
+<svg
+  version="1.1"
+  id="lead-scoring-illustration"
+  role="img"
+  aria-label="Lead Scoring Feature Illustration"
+  viewBox="0 0 256 256"
+  preserveAspectRatio="xMidYMid meet"
+  style="min-width:64px; max-width:256px; height:auto;"
+  xmlns="http://www.w3.org/2000/svg"
+>
+  <title>Lead Scoring Feature Illustration</title>
+  <desc>Visual representation of the lead scoring system showing ranking and prioritization</desc>
+  
+  <!-- Background/Empty Circle's radius reference -->
+  <!-- (Optional: Could add a faint circular background if desired) -->
+  
+  <!-- Arc for LOW score range -->
+  <path
+    d="M 228,128 A 100,100 0 0 1 128,28"
+    fill="none"
+    stroke="var(--color-secondary, #64748b)"
+    stroke-width="16"
+    stroke-linecap="round"
+  />
+  
+  <!-- Arc for MEDIUM score range -->
+  <path
+    d="M 128,28 A 100,100 0 0 1 28,128"
+    fill="none"
+    stroke="var(--color-accent, #0ea5e9)"
+    stroke-width="16"
+    stroke-linecap="round"
+  />
+  
+  <!-- Arc for HIGH score range -->
+  <path
+    d="M 28,128 A 100,100 0 0 1 128,228"
+    fill="none"
+    stroke="var(--color-primary, #2563eb)"
+    stroke-width="16"
+    stroke-linecap="round"
+  />
+  
+  <!-- Arc for EXCELLENT score range -->
+  <path
+    d="M 128,228 A 100,100 0 0 1 228,128"
+    fill="none"
+    stroke="var(--color-primary, #2563eb)"
+    stroke-width="16"
+    stroke-opacity="0.6"
+    stroke-linecap="round"
+  />
+  
+  <!-- Center Label -->
+  <text
+    x="128"
+    y="140"
+    text-anchor="middle"
+    fill="var(--color-primary, #2563eb)"
+    font-size="18"
+    font-family="sans-serif"
+  >
+    Lead Score
+  </text>
+</svg>
