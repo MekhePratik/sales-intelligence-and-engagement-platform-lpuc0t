@@ -1,0 +1,81 @@
+{
+  "_comment_intention": "ESLint configuration file enforcing TypeScript, React, and Next.js performance best practices in alignment with the technical specifications. Includes code quality, development environment, and performance requirements.",
+  "_comment_thirdPartyDependencies": {
+    "eslint": "^8.49.0",
+    "eslint-config-next": "^14.0.0",
+    "@typescript-eslint/parser": "^6.7.0",
+    "@typescript-eslint/eslint-plugin": "^6.7.0",
+    "eslint-plugin-react": "^7.33.0"
+  },
+  "root": true,
+  "env": {
+    "browser": true,
+    "es2022": true,
+    "node": true,
+    "jest": true
+  },
+  "extends": [
+    "next/core-web-vitals",
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:react/recommended",
+    "plugin:react/jsx-runtime"
+  ],
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": "latest",
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    },
+    "project": "./tsconfig.json"
+  },
+  "plugins": [
+    "@typescript-eslint",
+    "react"
+  ],
+  "settings": {
+    "react": {
+      "version": "detect"
+    }
+  },
+  "rules": {
+    "react/prop-types": "off",
+    "react/react-in-jsx-scope": "off",
+    "@typescript-eslint/explicit-function-return-type": "off",
+    "@typescript-eslint/explicit-module-boundary-types": "off",
+    "@typescript-eslint/no-explicit-any": "error",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      {
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_"
+      }
+    ],
+    "no-console": [
+      "warn",
+      {
+        "allow": ["warn", "error"]
+      }
+    ],
+    "eqeqeq": "error",
+    "no-var": "error",
+    "prefer-const": "error",
+    "arrow-body-style": [
+      "error",
+      "as-needed"
+    ],
+    "curly": [
+      "error",
+      "all"
+    ]
+  },
+  "ignorePatterns": [
+    "node_modules/",
+    ".next/",
+    "coverage/",
+    "dist/",
+    "*.config.js",
+    "*.config.ts"
+  ]
+}
