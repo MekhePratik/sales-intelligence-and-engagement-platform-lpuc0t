@@ -1,0 +1,34 @@
+# ------------------------------------------------------------------------------
+# This .gitkeep file ensures the 'prisma/migrations' directory is tracked by Git
+# even when no actual migration files are present. Maintaining this directory is
+# critical for database schema management and version control, as outlined in:
+#  - Technical Specification Sections:
+#       (1) "2. SYSTEM ARCHITECTURE/2.2 Component Details/Core Components"
+#           regarding Database Schema Management
+#       (2) "5. SYSTEM DESIGN/5.2 DATABASE DESIGN/Storage Strategy"
+#           regarding PostgreSQL database schema version control
+#
+# Purpose & Importance:
+#  - Maintains consistent directory structure for Prisma migrations, enabling
+#    collaborative database schema changes across teams.
+#  - Preserves essential schema versioning history to support the project's Data
+#    Storage Strategy and to align with enterprise-grade version control practices.
+#  - Prevents accidental deletion of the migration directory, safeguarding the
+#    foundation for change tracking and rollback procedures.
+#
+# Maintenance Requirements:
+#  1. THIS FILE MUST REMAIN EMPTY: No code or migration files should be placed here.
+#  2. MUST NOT BE DELETED under any circumstance (unless superseded by project-wide
+#     repository reorganization).
+#  3. ESSENTIAL FOR GIT: Without this placeholder, Git would ignore this directory
+#     if empty, causing potential loss of migration history and schema changes.
+#  4. CRITICAL FOR DATABASE SCHEMA VERSION CONTROL: Ensures all developers,
+#     CI/CD pipelines, and staging/production environments maintain a reliable
+#     structure for Prisma migrations.
+#
+# Usage Notes:
+#  - Deployments and CI/CD pipelines rely on the existence of this folder to
+#    properly locate and run new migration scripts.
+#  - If you are checking in a new Prisma migration, it should reside in this
+#    directory as a subfolder containing the appropriate migration files.
+# ------------------------------------------------------------------------------
