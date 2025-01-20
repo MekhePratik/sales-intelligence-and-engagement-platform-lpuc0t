@@ -1,0 +1,118 @@
+{
+  "file_path": "monitoring/datadog-monitors.json",
+  "src_subfolder": "monitoring",
+  "description": "Comprehensive monitoring configuration for the B2B sales intelligence platform, including metric alerts and synthetic tests",
+  "requirements_addressed": [
+    {
+      "name": "Performance Monitoring",
+      "location": "4.5 MONITORING AND ALERTING/A.4.1 Alert Thresholds",
+      "description": "Implements monitoring for API latency, error rates, and resource usage with specified thresholds"
+    },
+    {
+      "name": "System Health",
+      "location": "2.1 High-Level Architecture/Core Components",
+      "description": "Monitors health and performance of core system components including API, database, and cache"
+    }
+  ],
+  "imports": {
+    "internal": [],
+    "external": [
+      {
+        "name": "Datadog",
+        "package_name": "@datadog/datadog-api-client",
+        "package_version": "^1.0.0",
+        "purpose": "Monitoring and alerting platform integration"
+      }
+    ]
+  },
+  "globals": [
+    {
+      "DD_API_KEY": "process.env.DATADOG_API_KEY"
+    },
+    {
+      "DD_APP_KEY": "process.env.DATADOG_APP_KEY"
+    }
+  ],
+  "monitors": [
+    {
+      "name": "API Response Time High",
+      "type": "metric alert",
+      "query": "avg(last_5m):avg:api_response_time_ms{service:b2b-sales-platform} > 500",
+      "message": "API response time is above critical threshold of 500ms. Please investigate potential performance issues. @pagerduty-api-team",
+      "tags": [
+        "service:api",
+        "env:production",
+        "team:backend"
+      ],
+      "options": {
+        "thresholds": {
+          "critical": 500,
+          "warning": 200
+        },
+        "notify_audit": true,
+        "include_tags": true,
+        "evaluation_delay": 60,
+        "new_host_delay": 300,
+        "notify_no_data": false,
+        "renotify_interval": 60
+      }
+    }
+  ],
+  "synthetics": [
+    {
+      "name": "API Health Check",
+      "type": "api",
+      "config": {
+        "assertions": [
+          {
+            "type": "statusCode",
+            "operator": "is",
+            "target": 200
+          },
+          {
+            "type": "responseTime",
+            "operator": "lessThan",
+            "target": 1000
+          }
+        ],
+        "request": {
+          "method": "GET",
+          "url": "https://api.b2bsales.com/health",
+          "timeout": 30
+        },
+        "locations": [
+          "aws:us-east-1",
+          "aws:eu-west-1",
+          "aws:ap-southeast-1"
+        ]
+      },
+      "message": "API health check failed. Check system status and dependencies. @backend-team",
+      "tags": [
+        "service:api",
+        "check:health",
+        "env:production"
+      ],
+      "status": "live",
+      "frequency": 300
+    }
+  ],
+  "exports": [
+    {
+      "name": "monitorConfig",
+      "type": "object",
+      "members_exposed": [
+        {
+          "member_name": "monitors",
+          "member_type": "array",
+          "export_type": "named"
+        },
+        {
+          "member_name": "synthetics",
+          "member_type": "array",
+          "export_type": "named"
+        }
+      ],
+      "purpose": "Export monitoring configuration for Datadog integration"
+    }
+  ]
+}
