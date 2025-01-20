@@ -1,0 +1,66 @@
+# Dependencies
+node_modules/
+.pnpm-store/
+.npmrc
+
+# Environment files
+.env
+.env.*
+.env.*.local
+!.env.example
+*.pem
+
+# Build outputs
+.next/
+build/
+dist/
+storybook-static/
+*.tsbuildinfo
+next-env.d.ts
+
+# IDE and Editor files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Testing and Coverage
+coverage/
+.nyc_output/
+.coverage/
+junit.xml
+/cypress/videos/
+/cypress/screenshots/
+/playwright-report/
+/test-results/
+
+# Debug logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-debug.log*
+
+# Local development
+*.log
+.docker/
+.vercel/
+
+# Database
+*.sqlite
+dump.rdb
+
+# Cache
+.cache/
+.eslintcache
+
+# Temporary files
+tmp/
+temp/
+
+# Supabase
+.supabase/
