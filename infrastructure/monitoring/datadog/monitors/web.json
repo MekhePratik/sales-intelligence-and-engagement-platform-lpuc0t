@@ -1,0 +1,190 @@
+{
+  "_comment_file_purpose": "Datadog monitor configurations for the B2B Sales Platform web application. This JSON file defines alert conditions, thresholds, escalation paths, and notification rules for critical performance and business metrics, aligning with the technical specifications regarding performance monitoring, user adoption, and conversion rates.",
+  "_comment_imports": {
+    "internal_import": {
+      "name": "METRIC_THRESHOLDS",
+      "source_file": "src/web/src/constants/metrics.ts",
+      "used_members": [
+        "GOOD_CONVERSION_RATE",
+        "GOOD_LEAD_SCORE"
+      ],
+      "_comment_details": "Although the final numeric values for certain alerts (e.g., 25% critical threshold for lead conversion) differ from the GOOD_CONVERSION_RATE=40 and GOOD_LEAD_SCORE=80, these constants represent broader success benchmarks in the system. They inform organizational KPIs even if the specific DataDog alerts trigger at more conservative or escalated thresholds."
+    },
+    "external_import": {
+      "name": "v1",
+      "package_name": "@datadog/datadog-api-client",
+      "package_version": "^1.0.0",
+      "_comment_details": "Used in deployment pipelines to programmatically manage or update these monitor definitions in Datadog."
+    }
+  },
+  "monitors": [
+    {
+      "_comment_monitor_overview": "Monitors Core Web Vitals LCP (Largest Contentful Paint) performance metrics. Ensures that page load speeds remain within the target threshold (2.5s) to maintain a quality user experience and comply with system performance requirements.",
+      "name": "Core Web Vitals - LCP Alert",
+      "type": "metric alert",
+      "query": "avg(last_5m):avg:web.core_web_vitals.lcp{service:b2b-sales-platform} by {page_path} > 2500",
+      "message": "LCP exceeding 2.5s threshold on {{page_path}}. This impacts user experience and SEO rankings.\n\nAlert details: {{value}} ms\n\n@team-frontend",
+      "tags": [
+        "service:b2b-sales-platform",
+        "monitor_type:performance",
+        "metric:lcp"
+      ],
+      "priority": 2,
+      "options": {
+        "_comment_options": "Alert triggers if LCP remains above 2.5s (critical) or 2.0s (warning) over a 5-minute average.",
+        "thresholds": {
+          "critical": 2500,
+          "warning": 2000
+        },
+        "notify_no_data": true,
+        "notify_audit": false,
+        "require_full_window": false,
+        "new_host_delay": 300,
+        "include_tags": true,
+        "escalation_message": "LCP issues persisting - please escalate to senior frontend team"
+      }
+    },
+    {
+      "_comment_monitor_overview": "Monitors the rate of errors reported to Datadog. If the proportion of requests resulting in errors exceeds 5%, an immediate alert is triggered. This helps maintain system stability and proactively address error-prone endpoints.",
+      "name": "Error Rate Alert",
+      "type": "metric alert",
+      "query": "sum(last_5m):sum:web.errors.count{service:b2b-sales-platform}.as_rate() > 0.05",
+      "message": "Error rate exceeding 5% threshold.\n\nCurrent rate: {{value}}%\n\n@team-frontend @team-backend",
+      "tags": [
+        "service:b2b-sales-platform",
+        "monitor_type:errors"
+      ],
+      "priority": 1,
+      "options": {
+        "_comment_options": "Triggers a critical alert at >5% error rate and a warning at >1%. Ensures timely detection of deteriorating platform health.",
+        "thresholds": {
+          "critical": 0.05,
+          "warning": 0.01
+        },
+        "notify_no_data": true,
+        "notify_audit": true,
+        "require_full_window": false,
+        "new_host_delay": 300,
+        "include_tags": true
+      }
+    },
+    {
+      "_comment_monitor_overview": "Checks average API response times for critical endpoints. Any endpoint averaging above 500ms is flagged for potential performance and user experience issues.",
+      "name": "API Response Time Alert",
+      "type": "metric alert",
+      "query": "avg(last_5m):avg:web.api.response.time{service:b2b-sales-platform} by {endpoint} > 500",
+      "message": "API response time exceeding 500ms on {{endpoint}}.\n\nCurrent latency: {{value}}ms\n\n@team-backend",
+      "tags": [
+        "service:b2b-sales-platform",
+        "monitor_type:performance",
+        "metric:latency"
+      ],
+      "priority": 2,
+      "options": {
+        "_comment_options": "Critical threshold set at 500ms to align with performance benchmarks from technical specs (p95 < 100ms is the eventual target, but this 500ms threshold signals early warnings).",
+        "thresholds": {
+          "critical": 500,
+          "warning": 200
+        },
+        "notify_no_data": true,
+        "notify_audit": false,
+        "require_full_window": false,
+        "new_host_delay": 300,
+        "include_tags": true
+      }
+    },
+    {
+      "_comment_monitor_overview": "Monitors user adoption rate, aligning with the KPI of an 80% active user rate within 30 days. Alerts if the platform dips below 60% adoption, reflecting a risk to end-user engagement targets.",
+      "name": "User Adoption Rate Alert",
+      "type": "metric alert",
+      "query": "avg(last_30m):avg:business.user.adoption.rate{service:b2b-sales-platform} < 60",
+      "message": "User adoption rate below target threshold.\n\nCurrent rate: {{value}}%\nTarget: 80%\n\n@team-product @team-success",
+      "tags": [
+        "service:b2b-sales-platform",
+        "monitor_type:business",
+        "metric:adoption"
+      ],
+      "priority": 3,
+      "options": {
+        "_comment_options": "Critical alert below 60%, warning below 70%, aligning with the user adoption scope described in the success criteria. The 30-minute average is used to detect trends quickly.",
+        "thresholds": {
+          "critical": 60,
+          "warning": 70
+        },
+        "notify_no_data": true,
+        "notify_audit": true,
+        "require_full_window": true,
+        "new_host_delay": 300,
+        "include_tags": true,
+        "evaluation_delay": 900
+      }
+    },
+    {
+      "_comment_monitor_overview": "Examines lead conversion rate, one of the core business metrics. Though the system's recommended GOOD_CONVERSION_RATE is 40%, this alert notifies teams if rates fall below 25%.",
+      "name": "Lead Conversion Rate Alert",
+      "type": "metric alert",
+      "query": "avg(last_1h):avg:business.lead.conversion.rate{service:b2b-sales-platform} < 25",
+      "message": "Lead conversion rate below critical threshold.\n\nCurrent rate: {{value}}%\nTarget: 40%\n\n@team-sales @team-marketing",
+      "tags": [
+        "service:b2b-sales-platform",
+        "monitor_type:business",
+        "metric:conversion"
+      ],
+      "priority": 2,
+      "options": {
+        "_comment_options": "Despite the overall success benchmark of 40% from METRIC_THRESHOLDS.GOOD_CONVERSION_RATE, a <25% rate triggers a critical alarm. Warning is set at 35% to provide an earlier heads-up.",
+        "thresholds": {
+          "critical": 25,
+          "warning": 35
+        },
+        "notify_no_data": true,
+        "notify_audit": true,
+        "require_full_window": true,
+        "new_host_delay": 300,
+        "include_tags": true,
+        "evaluation_delay": 1800
+      }
+    }
+  ],
+  "notification_channels": {
+    "_comment_channel_purpose": "Default notification channels referenced by the monitors above. Each channel can be overridden at the group or monitor level if more specific routing is required.",
+    "slack": {
+      "channel": "#monitoring-alerts",
+      "notify": "@here"
+    },
+    "email": {
+      "to": [
+        "platform-alerts@company.com"
+      ],
+      "include_snapshot": true
+    },
+    "pagerduty": {
+      "service_key": "{{pagerduty_service_key}}",
+      "critical_only": true
+    }
+  },
+  "monitor_groups": [
+    {
+      "_comment_group_overview": "Groups relevant to the platform’s frontend and performance metrics. Provides an override Slack channel to notify the frontend team more directly.",
+      "name": "Web Performance",
+      "monitors": [
+        "Core Web Vitals - LCP Alert",
+        "API Response Time Alert"
+      ],
+      "notification_channel_overrides": {
+        "slack": "#frontend-alerts"
+      }
+    },
+    {
+      "_comment_group_overview": "Groups business-critical metrics spun around user adoption and conversion. The Slack override targets the business and marketing channels.",
+      "name": "Business Metrics",
+      "monitors": [
+        "User Adoption Rate Alert",
+        "Lead Conversion Rate Alert"
+      ],
+      "notification_channel_overrides": {
+        "slack": "#business-alerts"
+      }
+    }
+  ]
+}
