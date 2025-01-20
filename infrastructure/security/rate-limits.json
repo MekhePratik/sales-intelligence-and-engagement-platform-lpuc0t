@@ -1,0 +1,259 @@
+{
+  /*
+   * ----------------------------------------------------------------------
+   * GLOBALS
+   * ----------------------------------------------------------------------
+   * These global values serve as high-level configuration parameters
+   * for the rate limiting feature. They can be utilized by the
+   * consuming application or libraries to standardize default window
+   * sizes or Redis key prefixes throughout the platform.
+   */
+  "DEFAULT_WINDOW_SECONDS": 60,
+  "REDIS_KEY_PREFIX": "ratelimit:",
+
+  /*
+   * ----------------------------------------------------------------------
+   * EXPORTS
+   * ----------------------------------------------------------------------
+   * This rateLimitConfig object encapsulates all endpoint-specific
+   * rate limiting rules, default limit definitions, user role overrides,
+   * custom rate limit headers, and Redis behavior settings. It is
+   * intended to be imported wherever rate limiting logic is required.
+   */
+  "rateLimitConfig": {
+    /*
+     * --------------------------------------------------------------------
+     * DEFAULT LIMITS
+     * --------------------------------------------------------------------
+     * Defines global fallback rules for users without special roles
+     * or any specific endpoint overrides. This ensures that standard
+     * anonymous or unauthenticated requests have a strictly controlled
+     * limit, while authenticated sessions get higher throughput.
+     */
+    "defaultLimits": {
+      /*
+       * Standard limit:
+       * - 100 requests per 60 seconds
+       * - If exceeded, error is RATE_LIMIT_EXCEEDED
+       * - Using token bucket strategy with a burst of 10
+       */
+      "standard": {
+        "requests": 100,
+        "window": 60,
+        "errorCode": "RATE_LIMIT_EXCEEDED",
+        "errorMessage": "Too many requests, please try again later",
+        "strategy": "token_bucket",
+        "burst": 10
+      },
+      /*
+       * Authenticated limit:
+       * - 1000 requests per 60 seconds
+       * - If exceeded, error is RATE_LIMIT_EXCEEDED
+       * - Using token bucket strategy with a burst of 50
+       * - For logged-in or identifiable clients
+       */
+      "authenticated": {
+        "requests": 1000,
+        "window": 60,
+        "errorCode": "RATE_LIMIT_EXCEEDED",
+        "errorMessage": "API rate limit exceeded",
+        "strategy": "token_bucket",
+        "burst": 50
+      }
+    },
+
+    /*
+     * --------------------------------------------------------------------
+     * ENDPOINT-SPECIFIC LIMITS
+     * --------------------------------------------------------------------
+     * A set of rules applying to particular endpoints in the system.
+     * Each key references a path or pattern, with rate limiting
+     * constraints tailored to the purpose or usage pattern of that
+     * endpoint (e.g., sensitive authentication routes, bulk operations,
+     * or standard queries).
+     */
+    "endpoints": {
+      /*
+       * /api/auth/*:
+       * - 50 requests per 60 seconds
+       * - Strategy: fixed window
+       * - If exceeded, block new requests for 300 seconds
+       */
+      "/api/auth/*": {
+        "requests": 50,
+        "window": 60,
+        "errorCode": "AUTH_RATE_LIMIT_EXCEEDED",
+        "errorMessage": "Too many authentication attempts",
+        "strategy": "fixed_window",
+        "blockDuration": 300
+      },
+      /*
+       * /api/leads/search:
+       * - 50 requests per 60 seconds
+       * - Strategy: sliding window
+       * - With second-level precision
+       */
+      "/api/leads/search": {
+        "requests": 50,
+        "window": 60,
+        "errorCode": "SEARCH_RATE_LIMIT_EXCEEDED",
+        "errorMessage": "Search rate limit exceeded",
+        "strategy": "sliding_window",
+        "precision": "second"
+      },
+      /*
+       * /api/leads/bulk/*:
+       * - 1000 requests per 3600 seconds (1 hour)
+       * - Supports queueing excess requests:
+       *   maxSize=10000, processingRate=100, timeout=7200
+       */
+      "/api/leads/bulk/*": {
+        "requests": 1000,
+        "window": 3600,
+        "queueOnExceed": true,
+        "queueConfig": {
+          "maxSize": 10000,
+          "processingRate": 100,
+          "timeout": 7200
+        },
+        "errorCode": "BULK_RATE_LIMIT_EXCEEDED",
+        "errorMessage": "Bulk operation rate limit exceeded"
+      },
+      /*
+       * /api/campaigns/*:
+       * - 100 requests per 60 seconds
+       * - Token bucket strategy with a burst of 20
+       */
+      "/api/campaigns/*": {
+        "requests": 100,
+        "window": 60,
+        "errorCode": "CAMPAIGN_RATE_LIMIT_EXCEEDED",
+        "errorMessage": "Campaign operation rate limit exceeded",
+        "strategy": "token_bucket",
+        "burst": 20
+      },
+      /*
+       * /api/sequences/*:
+       * - 100 requests per 60 seconds
+       * - Token bucket strategy with a burst of 20
+       */
+      "/api/sequences/*": {
+        "requests": 100,
+        "window": 60,
+        "errorCode": "SEQUENCE_RATE_LIMIT_EXCEEDED",
+        "errorMessage": "Sequence operation rate limit exceeded",
+        "strategy": "token_bucket",
+        "burst": 20
+      },
+      /*
+       * /api/analytics/*:
+       * - 50 requests per 60 seconds
+       * - Strategy: sliding window
+       * - Second-level precision
+       */
+      "/api/analytics/*": {
+        "requests": 50,
+        "window": 60,
+        "errorCode": "ANALYTICS_RATE_LIMIT_EXCEEDED",
+        "errorMessage": "Analytics request rate limit exceeded",
+        "strategy": "sliding_window",
+        "precision": "second"
+      },
+      /*
+       * /webhooks/*:
+       * - 500 requests per 3600 seconds (1 hour)
+       * - If limit is exceeded, subsequent requests are dropped
+       * - Token bucket with a burst of 100
+       */
+      "/webhooks/*": {
+        "requests": 500,
+        "window": 3600,
+        "dropOnExceed": true,
+        "errorCode": "WEBHOOK_RATE_LIMIT_EXCEEDED",
+        "errorMessage": "Webhook rate limit exceeded",
+        "strategy": "token_bucket",
+        "burst": 100
+      }
+    },
+
+    /*
+     * --------------------------------------------------------------------
+     * OVERRIDES
+     * --------------------------------------------------------------------
+     * Customizable multipliers or exceptions for special roles, such
+     * as admin users or system API keys. These overrides can exclude
+     * specific endpoints from limits or increase rate thresholds.
+     */
+    "overrides": {
+      /*
+       * Admin users: Double the rate limits on all endpoints except auth routes
+       */
+      "admin": {
+        "multiplier": 2,
+        "description": "Double rate limits for admin users",
+        "excludedEndpoints": [
+          "/api/auth/*"
+        ]
+      },
+      /*
+       * API keys: 5x the rate limits on all endpoints except auth and webhooks
+       */
+      "api": {
+        "multiplier": 5,
+        "description": "5x rate limits for API keys",
+        "excludedEndpoints": [
+          "/api/auth/*",
+          "/webhooks/*"
+        ]
+      }
+    },
+
+    /*
+     * --------------------------------------------------------------------
+     * HEADERS
+     * --------------------------------------------------------------------
+     * Configures whether custom headers are sent to clients informing
+     * them of their remaining requests (X-RateLimit-Remaining), the
+     * total limit, reset time, etc. This data helps well-behaved clients
+     * manage their usage and avoid being throttled unexpectedly.
+     */
+    "headers": {
+      "enabled": true,
+      "remaining": "X-RateLimit-Remaining",
+      "limit": "X-RateLimit-Limit",
+      "reset": "X-RateLimit-Reset",
+      "retryAfter": "Retry-After"
+    },
+
+    /*
+     * --------------------------------------------------------------------
+     * REDIS CONFIG
+     * --------------------------------------------------------------------
+     * Controls how the platform’s rate limit logic interacts with Redis.
+     * Includes toggling between cluster mode, sliding window usage,
+     * expiration times, and fallback strategies if Redis is unavailable.
+     */
+    "redis": {
+      /* Prefix used on Redis keys for namespacing rate limit sets. */
+      "keyPrefix": "ratelimit:",
+      /* If slidingWindow is true, more precise sub-window calculations occur. */
+      "slidingWindow": true,
+      /* Precision can be 'second', 'millisecond', etc., for time calculations. */
+      "precision": "second",
+      /* Whether or not to expect Redis cluster mode in production environments. */
+      "clusterMode": true,
+      /* The TTL (Time To Live) in seconds for keys storing rate limit data. */
+      "keyExpiration": 7200,
+      /*
+       * Error handling policy for Redis operations:
+       * - Retry up to 3 times with a 100ms delay
+       * - On repeated failures, fallback to an in-memory approach
+       */
+      "errorHandling": {
+        "retryAttempts": 3,
+        "retryDelay": 100,
+        "fallbackStrategy": "memory"
+      }
+    }
+  }
+}
