@@ -1,0 +1,178 @@
+{
+  // ========================================================================
+  // External Import Reference:
+  // "typescript": "^5.2.0"
+  // This defines the external TypeScript compiler and language services
+  // ========================================================================
+
+  "compilerOptions": {
+    // --------------------------------------------------------------------------------
+    // Target specifies the ECMAScript version output; ES2022 unlocks modern JS features
+    // --------------------------------------------------------------------------------
+    "target": "ES2022",
+
+    // --------------------------------------------------------------------------------
+    // Module system; "ESNext" ensures usage of the latest ECMAScript module format
+    // --------------------------------------------------------------------------------
+    "module": "ESNext",
+
+    // --------------------------------------------------------------------------------
+    // lib array extends the default types with ES2022 features for more capabilities
+    // --------------------------------------------------------------------------------
+    "lib": ["ES2022"],
+
+    // --------------------------------------------------------------------------------
+    // Tells compiler how modules are resolved; "node" for Node.js style resolution
+    // --------------------------------------------------------------------------------
+    "moduleResolution": "node",
+
+    // --------------------------------------------------------------------------------
+    // rootDir defines the base directory of source files, ensuring file structure
+    // --------------------------------------------------------------------------------
+    "rootDir": "./src",
+
+    // --------------------------------------------------------------------------------
+    // outDir is where the compiled .js and declaration files will be generated
+    // --------------------------------------------------------------------------------
+    "outDir": "./dist",
+
+    // --------------------------------------------------------------------------------
+    // esModuleInterop allows default imports from modules with different export styles
+    // --------------------------------------------------------------------------------
+    "esModuleInterop": true,
+
+    // --------------------------------------------------------------------------------
+    // strict mode enables a wide range of type checks for maximum type safety
+    // --------------------------------------------------------------------------------
+    "strict": true,
+
+    // --------------------------------------------------------------------------------
+    // skipLibCheck ensures faster builds by not checking .d.ts files from dependencies
+    // --------------------------------------------------------------------------------
+    "skipLibCheck": true,
+
+    // --------------------------------------------------------------------------------
+    // forceConsistentCasingInFileNames ensures that file imports match the exact case
+    // --------------------------------------------------------------------------------
+    "forceConsistentCasingInFileNames": true,
+
+    // --------------------------------------------------------------------------------
+    // resolveJsonModule allows importing of .json files as modules with typed structure
+    // --------------------------------------------------------------------------------
+    "resolveJsonModule": true,
+
+    // --------------------------------------------------------------------------------
+    // declaration generates .d.ts type definition files for external consumption
+    // --------------------------------------------------------------------------------
+    "declaration": true,
+
+    // --------------------------------------------------------------------------------
+    // sourceMap generates .map files for better debugging in production and development
+    // --------------------------------------------------------------------------------
+    "sourceMap": true,
+
+    // --------------------------------------------------------------------------------
+    // incremental enables faster rebuilds by creating a .tsbuildinfo file
+    // --------------------------------------------------------------------------------
+    "incremental": true,
+
+    // --------------------------------------------------------------------------------
+    // tsBuildInfoFile is the name and location of the incremental build file
+    // --------------------------------------------------------------------------------
+    "tsBuildInfoFile": "./dist/.tsbuildinfo",
+
+    // --------------------------------------------------------------------------------
+    // allowJs set to false enforces a TypeScript-only codebase, blocking .js files
+    // --------------------------------------------------------------------------------
+    "allowJs": false,
+
+    // --------------------------------------------------------------------------------
+    // noEmit = false means the compiler will generate output files
+    // --------------------------------------------------------------------------------
+    "noEmit": false,
+
+    // --------------------------------------------------------------------------------
+    // isolatedModules ensures each file can be safely transpiled without type info
+    // --------------------------------------------------------------------------------
+    "isolatedModules": true,
+
+    // --------------------------------------------------------------------------------
+    // baseUrl indicates the base path for non-relative module imports
+    // --------------------------------------------------------------------------------
+    "baseUrl": ".",
+
+    // --------------------------------------------------------------------------------
+    // paths define import aliases for a cleaner and more maintainable directory layout
+    // --------------------------------------------------------------------------------
+    "paths": {
+      "@/*": ["src/*"],
+      "@lib/*": ["src/lib/*"],
+      "@utils/*": ["src/utils/*"],
+      "@config/*": ["src/config/*"],
+      "@services/*": ["src/services/*"],
+      "@models/*": ["src/models/*"]
+    },
+
+    // --------------------------------------------------------------------------------
+    // Includes default type definitions for Node.js and Jest testing environment
+    // --------------------------------------------------------------------------------
+    "types": ["node", "jest"],
+
+    // --------------------------------------------------------------------------------
+    // noUnusedLocals prevents variable declarations that are never used
+    // --------------------------------------------------------------------------------
+    "noUnusedLocals": true,
+
+    // --------------------------------------------------------------------------------
+    // noUnusedParameters flags function parameters that are never utilized
+    // --------------------------------------------------------------------------------
+    "noUnusedParameters": true,
+
+    // --------------------------------------------------------------------------------
+    // noImplicitReturns enforces explicit return for each function code path
+    // --------------------------------------------------------------------------------
+    "noImplicitReturns": true,
+
+    // --------------------------------------------------------------------------------
+    // noFallthroughCasesInSwitch disallows fallthrough in switch statements
+    // --------------------------------------------------------------------------------
+    "noFallthroughCasesInSwitch": true,
+
+    // --------------------------------------------------------------------------------
+    // allowUnreachableCode set to false flags unreachable code as an error
+    // --------------------------------------------------------------------------------
+    "allowUnreachableCode": false,
+
+    // --------------------------------------------------------------------------------
+    // allowUnusedLabels set to false flags any unused labels in the code
+    // --------------------------------------------------------------------------------
+    "allowUnusedLabels": false,
+
+    // --------------------------------------------------------------------------------
+    // noImplicitOverride requires an override modifier when overriding a base method
+    // --------------------------------------------------------------------------------
+    "noImplicitOverride": true,
+
+    // --------------------------------------------------------------------------------
+    // verbatimModuleSyntax preserves the exact import/export statements in transpilation
+    // --------------------------------------------------------------------------------
+    "verbatimModuleSyntax": true
+  },
+
+  // ------------------------------------------------------------------------------------
+  // Include array specifies which files and directories to include in the compilation
+  // ------------------------------------------------------------------------------------
+  "include": ["src/**/*.ts", "src/**/*.d.ts"],
+
+  // ------------------------------------------------------------------------------------
+  // Exclude array omits certain folders or files from compilation
+  // ------------------------------------------------------------------------------------
+  "exclude": [
+    "node_modules",
+    "dist",
+    "coverage",
+    "tests",
+    "**/*.test.ts",
+    "**/*.spec.ts"
+  ]
+}
