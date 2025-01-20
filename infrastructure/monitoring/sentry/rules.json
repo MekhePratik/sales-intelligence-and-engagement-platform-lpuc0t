@@ -1,0 +1,205 @@
+{
+  "sentryRules": {
+    "issue_grouping": {
+      "rules": [
+        {
+          "type": "stacktrace",
+          "pattern": "**",
+          "grouping_config": {
+            "strategy": "frame",
+            "variables": {
+              "function": true,
+              "module": true,
+              "package": true,
+              "filename": true
+            }
+          }
+        },
+        {
+          "type": "error",
+          "pattern": "INTERNAL_SERVER_ERROR",
+          "grouping_config": {
+            "strategy": "message",
+            "variables": {
+              "error_type": true,
+              "error_value": true,
+              "error_cause": true
+            }
+          }
+        },
+        {
+          "type": "error",
+          "pattern": "VALIDATION_ERROR",
+          "grouping_config": {
+            "strategy": "message",
+            "variables": {
+              "error_type": true,
+              "error_value": true,
+              "path": true,
+              "field": true
+            }
+          }
+        }
+      ]
+    },
+    "fingerprinting": {
+      "rules": [
+        {
+          "pattern": "database.*",
+          "fingerprint": [
+            "database-error",
+            "{{ error.type }}",
+            "{{ error.value }}",
+            "{{ error.table }}"
+          ]
+        },
+        {
+          "pattern": "auth.*",
+          "fingerprint": [
+            "auth-error",
+            "{{ error.type }}",
+            "{{ error.code }}",
+            "{{ http.method }}"
+          ]
+        },
+        {
+          "pattern": "rate-limit.*",
+          "fingerprint": [
+            "rate-limit",
+            "{{ error.type }}",
+            "{{ http.url }}",
+            "{{ http.method }}"
+          ]
+        },
+        {
+          "pattern": "api.*",
+          "fingerprint": [
+            "api-error",
+            "{{ error.type }}",
+            "{{ http.status_code }}",
+            "{{ http.route }}"
+          ]
+        }
+      ]
+    },
+    "sampling": {
+      "rules": [
+        {
+          "type": "trace",
+          "condition": {
+            "op": "http.server",
+            "name": [
+              "/health",
+              "/metrics",
+              "/status"
+            ]
+          },
+          "sampling_rate": 0.1
+        },
+        {
+          "type": "trace",
+          "condition": {
+            "op": "http.server",
+            "name": "/api/*"
+          },
+          "sampling_rate": 0.5
+        },
+        {
+          "type": "error",
+          "condition": {
+            "error_type": [
+              "INTERNAL_SERVER_ERROR"
+            ]
+          },
+          "sampling_rate": 1.0
+        },
+        {
+          "type": "transaction",
+          "condition": {
+            "op": "db.query",
+            "duration_ms": ">500"
+          },
+          "sampling_rate": 0.8
+        }
+      ]
+    },
+    "processing_rules": {
+      "sanitize": [
+        {
+          "type": "remove",
+          "pattern": [
+            "password",
+            "secret",
+            "token",
+            "key"
+          ],
+          "scope": [
+            "request.data",
+            "request.cookies",
+            "request.headers",
+            "response.data"
+          ]
+        },
+        {
+          "type": "mask",
+          "pattern": [
+            "email",
+            "phone",
+            "address"
+          ],
+          "scope": [
+            "request.data",
+            "response.data"
+          ],
+          "mask_char": "*",
+          "chars_visible": 4
+        },
+        {
+          "type": "hash",
+          "pattern": [
+            "session_id",
+            "user_id"
+          ],
+          "scope": [
+            "request.cookies",
+            "request.headers"
+          ],
+          "algorithm": "sha256"
+        }
+      ],
+      "exclude": [
+        {
+          "type": "browser_extensions",
+          "patterns": [
+            "chrome-extension://",
+            "moz-extension://",
+            "safari-extension://"
+          ]
+        },
+        {
+          "type": "localhost",
+          "patterns": [
+            "localhost",
+            "127.0.0.1",
+            "0.0.0.0"
+          ]
+        },
+        {
+          "type": "noise",
+          "patterns": [
+            "*favicon.ico",
+            "*/static/*",
+            "*/assets/*"
+          ]
+        }
+      ]
+    },
+    "alert_thresholds": {
+      "error_rate": {
+        "warning": 1,
+        "critical": 5
+      },
+      "response_time_minutes": 15
+    }
+  }
+}
