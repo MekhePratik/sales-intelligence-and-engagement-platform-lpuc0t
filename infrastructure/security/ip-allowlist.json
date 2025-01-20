@@ -1,0 +1,332 @@
+{
+  // ---------------------------------------------------------------------------------------------
+  // ip_allowlist_config
+  // ---------------------------------------------------------------------------------------------
+  // This section defines the core IP allowlist configuration for controlling access to the
+  // B2B sales intelligence platform. It includes options for strict enforcement, default
+  // actions, network definitions, exceptions, and monitoring parameters.
+  // ---------------------------------------------------------------------------------------------
+  "ip_allowlist_config": {
+    // -------------------------------------------------------------------------------------------
+    // enabled
+    // -------------------------------------------------------------------------------------------
+    // Indicates whether the IP allowlist feature is active.
+    // When true, the platform will enforce IP-based rules as configured.
+    // -------------------------------------------------------------------------------------------
+    "enabled": true,
+
+    // -------------------------------------------------------------------------------------------
+    // enforce_mode
+    // -------------------------------------------------------------------------------------------
+    // Determines the mode of enforcement. Possible values:
+    //  - "strict": Enforce deny rules for any source not explicitly allowed.
+    //  - "report": Log only, with no blocking action.
+    // -------------------------------------------------------------------------------------------
+    "enforce_mode": "strict",
+
+    // -------------------------------------------------------------------------------------------
+    // default_action
+    // -------------------------------------------------------------------------------------------
+    // Behavior applied if an IP or network does not match any configured network.
+    //  - "allow": Accept traffic by default
+    //  - "deny": Block traffic by default
+    // -------------------------------------------------------------------------------------------
+    "default_action": "deny",
+
+    // -------------------------------------------------------------------------------------------
+    // networks
+    // -------------------------------------------------------------------------------------------
+    // Enumerates the various trusted and restricted networks or IP ranges,
+    // including corporate offices, VPNs, and cloud service providers.
+    // Each entry describes its allowed CIDRs, access level, and rate limits.
+    // -------------------------------------------------------------------------------------------
+    "networks": {
+      // -----------------------------------------------------------------------------------------
+      // office_networks
+      // -----------------------------------------------------------------------------------------
+      // Represents the on-premises corporate office IP ranges with full platform access.
+      // These subnets usually encompass devices within a trusted local network environment.
+      // -----------------------------------------------------------------------------------------
+      "office_networks": {
+        "description": "Corporate office networks with full platform access",
+        "cidrs": [
+          "10.0.0.0/8",
+          "172.16.0.0/12",
+          "192.168.0.0/16"
+        ],
+        // -----------------------------------------------------------------------
+        // access_level
+        // -----------------------------------------------------------------------
+        // "full" indicates unrestricted access to all endpoints and resources,
+        // subject only to role-based authorization and other application-level checks.
+        // -----------------------------------------------------------------------
+        "access_level": "full",
+
+        // -----------------------------------------------------------------------
+        // rate_limit
+        // -----------------------------------------------------------------------
+        // Per-minute request thresholds for office networks, allowing a generous burst.
+        // -----------------------------------------------------------------------
+        "rate_limit": {
+          "requests_per_minute": 1000,
+          "burst": 100
+        }
+      },
+
+      // -----------------------------------------------------------------------------------------
+      // vpn_networks
+      // -----------------------------------------------------------------------------------------
+      // Contains IP ranges associated with remote corporate VPN connections.
+      // These networks grant full access, similar to office networks, but may require MFA.
+      // -----------------------------------------------------------------------------------------
+      "vpn_networks": {
+        "description": "Corporate VPN networks for remote access",
+        "cidrs": [
+          "10.100.0.0/16",
+          "10.101.0.0/16"
+        ],
+        "access_level": "full",
+        "rate_limit": {
+          "requests_per_minute": 500,
+          "burst": 50
+        },
+        // -----------------------------------------------------------------------
+        // require_mfa
+        // -----------------------------------------------------------------------
+        // Enforces multi-factor authentication checks for requests originating
+        // from these VPN subnets if the platform's security policy demands it.
+        // -----------------------------------------------------------------------
+        "require_mfa": true
+      },
+
+      // -----------------------------------------------------------------------------------------
+      // cloud_services
+      // -----------------------------------------------------------------------------------------
+      // Represents specific IP ranges from cloud providers that are allowed
+      // restricted access, generally for integration endpoints or system health checks.
+      // -----------------------------------------------------------------------------------------
+      "cloud_services": {
+        "description": "Allowed cloud service providers with restricted access",
+        "cidrs": [
+          "13.32.0.0/15",
+          "52.84.0.0/15",
+          "54.192.0.0/12"
+        ],
+        // -----------------------------------------------------------------------
+        // access_level
+        // -----------------------------------------------------------------------
+        // "restricted" denotes limited access, typically to only pre-defined
+        // endpoints necessary for the external service’s function.
+        // -----------------------------------------------------------------------
+        "access_level": "restricted",
+
+        // -----------------------------------------------------------------------
+        // allowed_paths
+        // -----------------------------------------------------------------------
+        // The subset of routes that cloud services may access (e.g., webhooks,
+        // integration callbacks, or status endpoints).
+        // -----------------------------------------------------------------------
+        "allowed_paths": [
+          "/api/webhooks/*",
+          "/api/integrations/*",
+          "/api/status/*"
+        ],
+
+        // -----------------------------------------------------------------------
+        // rate_limit
+        // -----------------------------------------------------------------------
+        // Higher request threshold for cloud-based systems that might send
+        // frequent callbacks or requests, requiring a larger capacity.
+        // -----------------------------------------------------------------------
+        "rate_limit": {
+          "requests_per_minute": 2000,
+          "burst": 200
+        }
+      }
+    },
+
+    // -------------------------------------------------------------------------------------------
+    // exceptions
+    // -------------------------------------------------------------------------------------------
+    // Defines specific exceptions or overrides to accommodate public-facing endpoints
+    // or development scenarios without relying exclusively on IP-based restrictions.
+    // -------------------------------------------------------------------------------------------
+    "exceptions": {
+      // -----------------------------------------------------------------------------------------
+      // public_endpoints
+      // -----------------------------------------------------------------------------------------
+      // A list of routes accessible without IP restrictions. Typically includes
+      // authentication routes, health checks, or public info endpoints.
+      // -----------------------------------------------------------------------------------------
+      "public_endpoints": {
+        "paths": [
+          "/api/auth/*",
+          "/api/public/*",
+          "/health",
+          "/metrics"
+        ],
+        "description": "Endpoints accessible without IP restrictions",
+        "rate_limit": {
+          "requests_per_minute": 100,
+          "burst": 20
+        }
+      },
+
+      // -----------------------------------------------------------------------------------------
+      // development_mode
+      // -----------------------------------------------------------------------------------------
+      // Allows requests from localhost or loopback addresses during development.
+      // Typically disabled in production to maintain strict network policies.
+      // -----------------------------------------------------------------------------------------
+      "development_mode": {
+        "enabled": false,
+        "allowed_ips": [
+          "127.0.0.1",
+          "::1"
+        ],
+        "description": "Development environment exceptions",
+        // -----------------------------------------------------------------------
+        // require_auth_header
+        // -----------------------------------------------------------------------
+        // Determines whether valid authorization headers are still needed even
+        // in development mode for added security or testing constraints.
+        // -----------------------------------------------------------------------
+        "require_auth_header": true
+      }
+    },
+
+    // -------------------------------------------------------------------------------------------
+    // monitoring
+    // -------------------------------------------------------------------------------------------
+    // Configuration for logging, alerting, and metric aggregation related
+    // to IP allowlist violations and usage statistics.
+    // -------------------------------------------------------------------------------------------
+    "monitoring": {
+      // -------------------------------------------------------------------------
+      // log_violations
+      // -------------------------------------------------------------------------
+      // When set to true, any IP-based block or violation is logged for
+      // later review, audit trails, or anomaly detection.
+      // -------------------------------------------------------------------------
+      "log_violations": true,
+
+      // -------------------------------------------------------------------------
+      // alert_on_violation
+      // -------------------------------------------------------------------------
+      // Dictates whether alerts (e.g., Slack, PagerDuty) should be triggered
+      // whenever IP restrictions are violated beyond certain thresholds.
+      // -------------------------------------------------------------------------
+      "alert_on_violation": true,
+
+      // -------------------------------------------------------------------------
+      // alert_threshold
+      // -------------------------------------------------------------------------
+      // Specifies the numeric thresholds that define when to raise alerts.
+      // For example, if the system sees more than violations_per_minute
+      // in a minute, an escalation might be triggered.
+      // -------------------------------------------------------------------------
+      "alert_threshold": {
+        "violations_per_minute": 100,
+        "violation_burst": 20
+      },
+
+      // -------------------------------------------------------------------------
+      // metrics
+      // -------------------------------------------------------------------------
+      // Provides options for tracking IP allowlist metrics such as allowed,
+      // denied, or rate-limited requests, as well as how long to store them.
+      // -------------------------------------------------------------------------
+      "metrics": {
+        "track_allowed": true,
+        "track_denied": true,
+        "track_rate_limits": true,
+        "retention_days": 30,
+        "aggregation_interval": "1m"
+      }
+    }
+  },
+
+  // ---------------------------------------------------------------------------------------------
+  // globals
+  // ---------------------------------------------------------------------------------------------
+  // References to environment variables that may be used alongside the IP allowlist.
+  // Typically, these flags enable or disable the entire mechanism at runtime and
+  // specify the current application environment (development, staging, production, etc.).
+  // ---------------------------------------------------------------------------------------------
+  "globals": {
+    // ENVIRONMENT indicates the application's current runtime environment
+    // (e.g., "development", "production"). This can be employed in verifying
+    // whether to apply stricter or more lenient IP restrictions.
+    "ENVIRONMENT": "process.env.NODE_ENV",
+
+    // ENFORCE_IP_ALLOWLIST toggles the actual activation of these IP rules at runtime.
+    // If false, the platform may choose to bypass or only log restrictions without blocking.
+    "ENFORCE_IP_ALLOWLIST": "process.env.ENFORCE_IP_ALLOWLIST === 'true'"
+  },
+
+  // ---------------------------------------------------------------------------------------------
+  // imports
+  // ---------------------------------------------------------------------------------------------
+  // Internal references or data used from other configuration files, ensuring
+  // that the IP allowlist aligns with the overarching WAF rules. The structure
+  // below references "ip_rules" from waf-rules.json, facilitating a combined
+  // security strategy.
+  // ---------------------------------------------------------------------------------------------
+  "imports": {
+    "wafRules": {
+      // ip_rules is a subset of the WAF configuration that covers IP-based restrictions,
+      // including explicit block/allow lists, country blocking, and reputation checks.
+      "ip_rules": {
+        "allow_list": [
+          "allow_list_placeholder"
+        ],
+        "block_list": [
+          "block_list_placeholder"
+        ],
+        "country_block_list": [
+          "restricted_countries"
+        ],
+        "ip_reputation_enabled": true,
+        "ip_reputation_threshold": 80,
+        "ip_rate_limiting": {
+          "enabled": true,
+          "window_size": 60,
+          "max_requests": 1000,
+          "burst_multiplier": 2
+        }
+      }
+    }
+  },
+
+  // ---------------------------------------------------------------------------------------------
+  // exports
+  // ---------------------------------------------------------------------------------------------
+  // Defines which parts of this configuration get externally exposed for usage or injection
+  // into the broader infrastructure. The ipAllowlistConfig object is exported to allow
+  // consumption by runtime systems that implement the actual IP filtering logic.
+  // ---------------------------------------------------------------------------------------------
+  "exports": [
+    {
+      "name": "ipAllowlistConfig",
+      "type": "object",
+      "members_exposed": [
+        {
+          "member_name": "networks",
+          "member_type": "object",
+          "export_type": "named"
+        },
+        {
+          "member_name": "exceptions",
+          "member_type": "object",
+          "export_type": "named"
+        },
+        {
+          "member_name": "monitoring",
+          "member_type": "object",
+          "export_type": "named"
+        }
+      ],
+      "purpose": "Export IP allowlist configuration for infrastructure deployment and security policy enforcement"
+    }
+  ]
+}
