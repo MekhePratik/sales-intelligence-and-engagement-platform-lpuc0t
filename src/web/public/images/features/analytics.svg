@@ -1,0 +1,45 @@
+<!-- 
+  This SVG icon represents the analytics feature in the B2B Sales Platform
+  and complies with the design system, accessibility, and performance
+  requirements detailed in the technical specification.
+-->
+<svg
+  xmlns="http://www.w3.org/2000/svg"
+  width="24"
+  height="24"
+  viewBox="0 0 24 24"
+  preserveAspectRatio="xMidYMid meet"
+  fill="none"
+  stroke="currentColor"
+  stroke-width="2"
+  stroke-linecap="round"
+  stroke-linejoin="round"
+  aria-label="Analytics icon"
+  role="img"
+>
+  <!-- Title and description for enhanced accessibility -->
+  <title>Analytics Visualization</title>
+  <desc>A line graph icon representing data analytics and performance metrics</desc>
+
+  <!-- Metadata block containing versioning and license information -->
+  <metadata>
+    {
+      "creator": "B2B Sales Platform Design Team",
+      "version": "1.0.0",
+      "last_modified": "2024-01-20",
+      "license": "Proprietary"
+    }
+  </metadata>
+
+  <!-- Axes for the chart (horizontal at the bottom, vertical on the left) -->
+  <path d="M3 19H21M3 19V5"/>
+
+  <!-- Example line chart path demonstrating analytics data trend -->
+  <path d="M3 19L8 12L12 14L16 10L21 6"/>
+
+  <!-- Optional data points for additional clarity -->
+  <circle cx="8" cy="12" r="1" />
+  <circle cx="12" cy="14" r="1" />
+  <circle cx="16" cy="10" r="1" />
+  <circle cx="21" cy="6" r="1" />
+</svg>
